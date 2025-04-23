@@ -15,7 +15,11 @@ export default function StackNavigator() {
           component={LoginScreen}
           options={{ headerShown: false }}
         />
-        <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen
+          name="Home"
+          component={HomeScreen}
+          options={{ headerShown: false }} // 👈 isso aqui remove a barra branca
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
