@@ -19,4 +19,4 @@ const CustomCalendar = ({ selectedDate, onDateChange }) => (
   />
 );
 
-export default Calendar;
+export default CustomCalendar;

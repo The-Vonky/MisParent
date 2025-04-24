@@ -1,3 +1,4 @@
+// src/navigation/StackNavigator.js
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
@@ -18,7 +19,7 @@ export default function StackNavigator() {
         <Stack.Screen
           name="Home"
           component={HomeScreen}
-          options={{ headerShown: false }} // 👈 isso aqui remove a barra branca
+          options={{ headerShown: false }}
         />
       </Stack.Navigator>
     </NavigationContainer>

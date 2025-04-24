@@ -6,21 +6,28 @@ import { Bell, MessageSquare } from 'lucide-react-native';
 const Header = ({ userName = 'Deywid' }) => {
   return (
     <View style={styles.header}>
-      {/* Esquerda: Foto + Nome */}
-      <View style={styles.leftSection}>
-        <Image source={require('../../assets/jorel.jpg')} style={styles.profilePic} />
-        <Text style={styles.userName}>Bem-vindo, {userName}</Text>
+      {/* Esquerda: Foto de perfil + nome */}
+      <View style={styles.left}>
+        <Image
+          source={require('../../assets/jorel.jpg')}
+          style={styles.profile}
+        />
+        <Text style={styles.welcome}>Bem-vindo,</Text>
+        <Text style={styles.name}>{userName}</Text>
       </View>
 
-      {/* Direita: Ícones + Logo */}
-      <View style={styles.rightSection}>
-        <TouchableOpacity style={styles.iconWrapper}>
-          <Bell color="#fff" size={22} />
+      {/* Direita: Notificações, Chat, Logo */}
+      <View style={styles.right}>
+        <TouchableOpacity style={styles.icon}>
+          <Bell color="#fff" size={20} />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.iconWrapper}>
-          <MessageSquare color="#fff" size={22} />
+        <TouchableOpacity style={styles.icon}>
+          <MessageSquare color="#fff" size={20} />
         </TouchableOpacity>
-        <Image source={require('../../assets/Logo.png')} style={styles.logo} />
+        <Image
+          source={require('../../assets/Logo.png')}
+          style={styles.logo}
+        />
       </View>
     </View>
   );
@@ -34,37 +41,43 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    elevation: 4,
-    zIndex: 10,
+    elevation: 8,
+    borderBottomLeftRadius: 16,
+    borderBottomRightRadius: 16,
   },
-  leftSection: {
+  left: {
     flexDirection: 'row',
     alignItems: 'center',
+    flexShrink: 1,
   },
-  profilePic: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+  profile: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     marginRight: 8,
   },
-  userName: {
+  welcome: {
+    color: '#e0e7ff',
+    fontSize: 14,
+    marginRight: 4,
+  },
+  name: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: 'bold',
   },
-  rightSection: {
+  right: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  iconWrapper: {
+  icon: {
     marginLeft: 12,
-    padding: 4,
   },
   logo: {
     width: 36,
     height: 36,
-    resizeMode: 'contain',
     marginLeft: 12,
+    resizeMode: 'contain',
   },
 });
 
