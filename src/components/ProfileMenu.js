@@ -1,5 +1,5 @@
 // src/components/ProfileMenu.js
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -7,60 +7,63 @@ import {
   TouchableOpacity,
   Animated,
   Dimensions,
+  Pressable,
 } from 'react-native';
+import { BlurView } from 'expo-blur';
+
 
 const screenWidth = Dimensions.get('window').width;
 
 const ProfileMenu = ({ visible, onClose }) => {
-  const translateX = React.useRef(new Animated.Value(-screenWidth)).current;
+  const translateX = useRef(new Animated.Value(-screenWidth)).current;
 
-  React.useEffect(() => {
+  useEffect(() => {
     Animated.timing(translateX, {
       toValue: visible ? 0 : -screenWidth,
-      duration: 300,
+      duration: 225,
       useNativeDriver: true,
     }).start();
   }, [visible]);
 
-  if (!visible && translateX._value <= -screenWidth + 10) return null;
-
   return (
-    <TouchableOpacity
-      style={styles.overlay}
-      onPress={onClose}
-      activeOpacity={1}
-    >
-      <Animated.View
-        style={[styles.menu, { transform: [{ translateX }] }]}
-      >
+    <View style={StyleSheet.absoluteFill} pointerEvents={visible ? 'auto' : 'none'}>
+      {visible && (
+        <Pressable style={styles.backdrop} onPress={onClose}>
+          <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
+        </Pressable>
+      )}
+
+      <Animated.View style={[styles.menu, { transform: [{ translateX }] }]}>
         <Text style={styles.title}>Perfil</Text>
+
+        <View style={styles.divider} />
 
         <TouchableOpacity style={styles.item}>
           <Text style={styles.text}>Dados do Responsável</Text>
         </TouchableOpacity>
 
+        <View style={styles.divider} />
+
         <TouchableOpacity style={styles.item}>
           <Text style={styles.text}>Configurações</Text>
         </TouchableOpacity>
 
+        <View style={styles.divider} />
+
         <TouchableOpacity style={styles.item}>
-          <Text style={styles.text}>Sair</Text>
+          <Text style={[styles.text, { color: '#ef4444' }]}>Sair</Text>
         </TouchableOpacity>
       </Animated.View>
-    </TouchableOpacity>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  overlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    backgroundColor: 'rgba(0,0,0,0.3)',
-    zIndex: 10,
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 1,
   },
+
   menu: {
     position: 'absolute',
     top: 0,
@@ -74,21 +77,29 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 2, height: 0 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
-    borderTopRightRadius: 16,
-    borderBottomRightRadius: 16,
+    zIndex: 2,
   },
+
   title: {
-    fontSize: 18,
+    fontSize: 25,
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: 5,
     color: '#1e3a8a',
   },
+
   item: {
     paddingVertical: 12,
   },
+
   text: {
     fontSize: 16,
     color: '#1e3a8a',
+  },
+
+  divider: {
+    height: 1,
+    backgroundColor: '#e5e7eb',
+    marginVertical: 8,
   },
 });
 
