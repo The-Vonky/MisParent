@@ -2,15 +2,16 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
 import { ChevronDown, ChevronUp } from 'lucide-react-native';
 
+
 const mockSchedule = {
   '2025-02-28': [
     { id: '1', title: 'Matemática', time: '08:00 - 09:40', teacher: 'Prof. Ana' },
     { id: '2', title: 'História', time: '10:00 - 11:40', teacher: 'Prof. Carlos' },
-  ],
-  '2025-03-01': [
-    { id: '1', title: 'Química', time: '08:00 - 09:40', teacher: 'Prof. João' },
-  ],
-};
+    { id: '3', title: 'Matemática', time: '08:00 - 09:40', teacher: 'Prof. Ana' },
+    { id: '4', title: 'História', time: '10:00 - 11:40', teacher: 'Prof. Carlos' },
+    { id: '5', title: 'Matemática', time: '08:00 - 09:40', teacher: 'Prof. Ana' },
+    { id: '6', title: 'História', time: '10:00 - 11:40', teacher: 'Prof. Carlos' },
+  ],}
 
 const ScheduleList = ({ date, expandedItem, onToggleExpand }) => {
   const data = mockSchedule[date] || [];
@@ -68,11 +69,14 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   heading: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '600',
     marginBottom: 12,
-    color: '#1e293b',
+    color: 'blue',
+    alignSelf: 'center',
+    textDecorationLine: 'underline',
   },
+
   empty: {
     fontStyle: 'italic',
     color: '#64748b',
