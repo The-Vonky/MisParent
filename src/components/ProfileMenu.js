@@ -1,5 +1,4 @@
-// src/components/ProfileMenu.js
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -10,20 +9,41 @@ import {
   Pressable,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
-
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const screenWidth = Dimensions.get('window').width;
 
 const ProfileMenu = ({ visible, onClose }) => {
   const translateX = useRef(new Animated.Value(-screenWidth)).current;
+  const [isVisible, setIsVisible] = useState(visible); // Controla a visibilidade da sidebar
+  const [closing, setClosing] = useState(false); // Controle do fechamento da sidebar
 
   useEffect(() => {
-    Animated.timing(translateX, {
-      toValue: visible ? 0 : -screenWidth,
-      duration: 225,
-      useNativeDriver: true,
-    }).start();
+    if (visible) {
+      setIsVisible(true); // Torna a sidebar visível
+      // Animação de entrada suave
+      Animated.timing(translateX, {
+        toValue: 0,
+        duration: 400,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      setClosing(true); // Indica que está fechando
+      // Animação de saída suave
+      Animated.timing(translateX, {
+        toValue: -screenWidth,
+        duration: 600,
+        useNativeDriver: true,
+      }).start(() => {
+        // Após a animação, chama o onClose e desabilita a visibilidade
+        setIsVisible(false);
+        onClose();
+        setClosing(false);
+      });
+    }
   }, [visible]);
+
+  if (!isVisible) return null; // Não renderiza a sidebar se não for visível
 
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents={visible ? 'auto' : 'none'}>
@@ -33,25 +53,77 @@ const ProfileMenu = ({ visible, onClose }) => {
         </Pressable>
       )}
 
-      <Animated.View style={[styles.menu, { transform: [{ translateX }] }]}>
-        <Text style={styles.title}>Perfil</Text>
+      <Animated.View
+        style={[
+          styles.menu,
+          { transform: [{ translateX }] },
+          { zIndex: 9999 }, // Garante que a sidebar sobreponha tudo até sair
+        ]}
+      >
+        <Text style={styles.title}>Menu</Text>
 
         <View style={styles.divider} />
 
         <TouchableOpacity style={styles.item}>
-          <Text style={styles.text}>Dados do Responsável</Text>
+          <Ionicons name="person" size={20} color="#1e3a8a" style={styles.icon} />
+          <Text style={styles.text}>Gerenciar Usuário</Text>
+          <Ionicons name="chevron-forward" size={20} color="#1e3a8a" style={styles.arrow} />
         </TouchableOpacity>
 
         <View style={styles.divider} />
 
         <TouchableOpacity style={styles.item}>
-          <Text style={styles.text}>Configurações</Text>
+          <Ionicons name="calendar" size={20} color="#1e3a8a" style={styles.icon} />
+          <Text style={styles.text}>Grade de Horários</Text>
+          <Ionicons name="chevron-forward" size={20} color="#1e3a8a" style={styles.arrow} />
         </TouchableOpacity>
 
         <View style={styles.divider} />
 
         <TouchableOpacity style={styles.item}>
+          <Ionicons name="list" size={20} color="#1e3a8a" style={styles.icon} />
+          <Text style={styles.text}>Atividades e Tarefas</Text>
+          <Ionicons name="chevron-forward" size={20} color="#1e3a8a" style={styles.arrow} />
+        </TouchableOpacity>
+
+        <View style={styles.divider} />
+
+        <TouchableOpacity style={styles.item}>
+          <Ionicons name="checkbox" size={20} color="#1e3a8a" style={styles.icon} />
+          <Text style={styles.text}>Frequência</Text>
+          <Ionicons name="chevron-forward" size={20} color="#1e3a8a" style={styles.arrow} />
+        </TouchableOpacity>
+
+        <View style={styles.divider} />
+
+        <TouchableOpacity style={styles.item}>
+          <Ionicons name="school" size={20} color="#1e3a8a" style={styles.icon} />
+          <Text style={styles.text}>Materiais do Aluno</Text>
+          <Ionicons name="chevron-forward" size={20} color="#1e3a8a" style={styles.arrow} />
+        </TouchableOpacity>
+
+        <View style={styles.divider} />
+
+        <TouchableOpacity style={styles.item}>
+          <Ionicons name="book" size={20} color="#1e3a8a" style={styles.icon} />
+          <Text style={styles.text}>Plano de Aula</Text>
+          <Ionicons name="chevron-forward" size={20} color="#1e3a8a" style={styles.arrow} />
+        </TouchableOpacity>
+
+        <View style={styles.divider} />
+
+        <TouchableOpacity style={styles.item}>
+          <Ionicons name="business" size={20} color="#1e3a8a" style={styles.icon} />
+          <Text style={styles.text}>Secretaria</Text>
+          <Ionicons name="chevron-forward" size={20} color="#1e3a8a" style={styles.arrow} />
+        </TouchableOpacity>
+
+        <View style={styles.divider} />
+
+        <TouchableOpacity style={styles.item}>
+          <Ionicons name="log-out" size={20} color="#ef4444" style={styles.icon} />
           <Text style={[styles.text, { color: '#ef4444' }]}>Sair</Text>
+          <Ionicons name="chevron-forward" size={20} color="#ef4444" style={styles.arrow} />
         </TouchableOpacity>
       </Animated.View>
     </View>
@@ -77,7 +149,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 2, height: 0 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
-    zIndex: 2,
+    zIndex: 9999, // Garante que a sidebar sobreponha tudo até sair
   },
 
   title: {
@@ -88,12 +160,23 @@ const styles = StyleSheet.create({
   },
 
   item: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingVertical: 12,
   },
 
   text: {
     fontSize: 16,
     color: '#1e3a8a',
+    flex: 1,
+  },
+
+  icon: {
+    marginRight: 12, // Adicionar mais espaço entre o ícone e o texto
+  },
+
+  arrow: {
+    marginLeft: 10, 
   },
 
   divider: {
