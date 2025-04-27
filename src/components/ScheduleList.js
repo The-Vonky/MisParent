@@ -1,7 +1,6 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, Animated } from 'react-native';
 import { ChevronDown, ChevronUp } from 'lucide-react-native';
-
 
 const mockSchedule = {
   '2025-02-28': [
@@ -11,51 +10,117 @@ const mockSchedule = {
     { id: '4', title: 'História', time: '10:00 - 11:40', teacher: 'Prof. Carlos' },
     { id: '5', title: 'Matemática', time: '08:00 - 09:40', teacher: 'Prof. Ana' },
     { id: '6', title: 'História', time: '10:00 - 11:40', teacher: 'Prof. Carlos' },
-  ],}
+  ],
+};
 
-const ScheduleList = ({ date, expandedItem, onToggleExpand }) => {
-  const data = mockSchedule[date] || [];
+const ScheduleList = ({ date }) => {
+  const [expandedItem, setExpandedItem] = useState(null);
+  const [heights] = useState({});
+  const [opacity] = useState({});
 
   const handlePress = (id) => {
-    onToggleExpand(expandedItem === id ? null : id);
+    if (expandedItem === id) {
+      // Fechar o item com animação mais lenta
+      Animated.parallel([
+        Animated.timing(heights[id], {
+          toValue: 0, // Contraindo a altura
+          duration: 500, // Tempo mais longo para fechamento
+          useNativeDriver: false,
+        }),
+        Animated.timing(opacity[id], {
+          toValue: 0, // Diminuindo a opacidade
+          duration: 300, // Tempo mais longo para fechamento
+          useNativeDriver: false,
+        }),
+      ]).start();
+      setExpandedItem(null);
+    } else {
+      // Fechar o item anteriormente aberto, caso haja
+      if (expandedItem) {
+        Animated.parallel([
+          Animated.timing(heights[expandedItem], {
+            toValue: 0,
+            duration: 500,
+            useNativeDriver: false,
+          }),
+          Animated.timing(opacity[expandedItem], {
+            toValue: 0,
+            duration: 500,
+            useNativeDriver: false,
+          }),
+        ]).start();
+      }
+
+      // Expandir o item clicado
+      setExpandedItem(id);
+      Animated.parallel([
+        Animated.timing(heights[id], {
+          toValue: 100, // Expansão da altura
+          duration: 300, // Tempo mais rápido para expansão
+          useNativeDriver: false,
+        }),
+        Animated.timing(opacity[id], {
+          toValue: 1, // Aumentando a opacidade
+          duration: 300, // Tempo mais rápido para expansão
+          useNativeDriver: false,
+        }),
+      ]).start();
+    }
   };
+
+  const renderItem = ({ item }) => {
+    const isExpanded = expandedItem === item.id;
+
+    // Inicializa a animação de altura e opacidade para cada item, se não estiver já configurado
+    if (!heights[item.id]) {
+      heights[item.id] = new Animated.Value(0); // altura inicial 0
+    }
+    if (!opacity[item.id]) {
+      opacity[item.id] = new Animated.Value(0); // opacidade inicial 0
+    }
+
+    return (
+      <TouchableOpacity
+        onPress={() => handlePress(item.id)}
+        style={styles.card}
+        activeOpacity={0.8}
+      >
+        <View style={styles.cardHeader}>
+          <Text style={styles.title}>{item.title}</Text>
+          {isExpanded ? (
+            <ChevronUp color="#1e3a8a" size={20} />
+          ) : (
+            <ChevronDown color="#1e3a8a" size={20} />
+          )}
+        </View>
+        <Text style={styles.time}>{item.time}</Text>
+        <Animated.View
+          style={[styles.details, { height: heights[item.id], opacity: opacity[item.id] }]}
+        >
+          {isExpanded && (
+            <>
+              <Text style={styles.detailText}>Professor: {item.teacher}</Text>
+              <Text style={styles.detailText}>Sala: 203</Text>
+              <Text style={styles.detailText}>Conteúdo: Revisão</Text>
+            </>
+          )}
+        </Animated.View>
+      </TouchableOpacity>
+    );
+  };
+
+  const data = mockSchedule[date] || [];
 
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>Aulas do Dia</Text>
+      <Text style={styles.heading}>Aulas do Dia:</Text>
       {data.length === 0 ? (
         <Text style={styles.empty}>Nenhuma aula cadastrada.</Text>
       ) : (
         <FlatList
           data={data}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => {
-            const isExpanded = expandedItem === item.id;
-            return (
-              <TouchableOpacity
-                onPress={() => handlePress(item.id)}
-                style={styles.card}
-                activeOpacity={0.8}
-              >
-                <View style={styles.cardHeader}>
-                  <Text style={styles.title}>{item.title}</Text>
-                  {isExpanded ? (
-                    <ChevronUp color="#1e3a8a" size={20} />
-                  ) : (
-                    <ChevronDown color="#1e3a8a" size={20} />
-                  )}
-                </View>
-                <Text style={styles.time}>{item.time}</Text>
-                {isExpanded && (
-                  <View style={styles.details}>
-                    <Text style={styles.detailText}>Professor: {item.teacher}</Text>
-                    <Text style={styles.detailText}>Sala: 203</Text>
-                    <Text style={styles.detailText}>Conteúdo: Revisão</Text>
-                  </View>
-                )}
-              </TouchableOpacity>
-            );
-          }}
+          renderItem={renderItem}
         />
       )}
     </View>
@@ -69,14 +134,11 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   heading: {
-    fontSize: 20,
-    fontWeight: '600',
-    marginBottom: 12,
-    color: 'blue',
-    alignSelf: 'center',
-    textDecorationLine: 'underline',
+    fontSize: 18,  // Ajustando o tamanho para ser mais suave
+    fontWeight: '500', // Menos peso, mais suave
+    color: '#1e3a8a', // Cor que combina com o restante do layout
+    marginBottom: 15,  // Espaço mais sutil entre o título e o conteúdo
   },
-
   empty: {
     fontStyle: 'italic',
     color: '#64748b',
@@ -105,6 +167,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   details: {
+    overflow: 'hidden', // Para esconder o conteúdo quando contraído
     marginTop: 8,
     borderTopWidth: 1,
     borderTopColor: '#e2e8f0',

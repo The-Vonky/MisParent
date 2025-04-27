@@ -1,15 +1,35 @@
-// src/components/Header.js
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { Bell, MessageSquare } from 'lucide-react-native';
+import NotificationModal from '../components/NotificationModal';
+import MessageModal from '../components/MessagesModal';
 
-const Header = ({ userName = 'Deywid', onProfilePress }) => {
+const Header = ({ userName = 'Mordecai', onProfilePress }) => {
+  const [isNotificationVisible, setNotificationVisible] = useState(false);
+  const [isMessageVisible, setMessageVisible] = useState(false);
+
+  const openNotifications = () => {
+    setNotificationVisible(true);
+  };
+
+  const closeNotifications = () => {
+    setNotificationVisible(false);
+  };
+
+  const openMessages = () => {
+    setMessageVisible(true);
+  };
+
+  const closeMessages = () => {
+    setMessageVisible(false);
+  };
+
   return (
     <View style={styles.header}>
       <View style={styles.left}>
         <TouchableOpacity onPress={onProfilePress}>
           <Image
-            source={require('../../assets/jorel.jpg')}
+            source={require('../../assets/mordecai.png')}
             style={styles.profile}
           />
         </TouchableOpacity>
@@ -18,18 +38,23 @@ const Header = ({ userName = 'Deywid', onProfilePress }) => {
       </View>
 
       <View style={styles.right}>
-        <TouchableOpacity style={styles.icon}>
+        <TouchableOpacity style={styles.icon} onPress={openNotifications}>
           <Bell color="#fff" size={20} />
         </TouchableOpacity>
         
-        <TouchableOpacity style={styles.icon}>
+        <TouchableOpacity style={styles.icon} onPress={openMessages}>
           <MessageSquare color="#fff" size={20} />
         </TouchableOpacity>
+
         <Image
           source={require('../../assets/Logo.png')}
           style={styles.logo}
         />
       </View>
+
+      {/* Aqui estão os modais */}
+      <NotificationModal visible={isNotificationVisible} onClose={closeNotifications} />
+      <MessageModal visible={isMessageVisible} onClose={closeMessages} />
     </View>
   );
 };
