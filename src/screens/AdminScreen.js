@@ -1,33 +1,25 @@
-// src/navigation/StackNavigator.js
+// src/screens/AdminScreen.js
 import React from 'react';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { NavigationContainer } from '@react-navigation/native';
-import LoginScreen from '../screens/LoginScreen';
-import HomeScreen from '../screens/HomeScreen';
-import AdminScreen from '../screens/AdminScreen'; // Adicionei a importação
+import { View, Text, StyleSheet } from 'react-native';
 
-const Stack = createNativeStackNavigator();
-
-export default function StackNavigator() {
+export default function AdminScreen() {
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login">
-        <Stack.Screen
-          name="Login"
-          component={LoginScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Home"
-          component={HomeScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Admin"
-          component={AdminScreen} // Adicionei a tela de Admin
-          options={{ headerShown: false }}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <View style={styles.container}>
+      <Text style={styles.title}>Tela de Administração</Text>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#1e3a8a',
+  },
+});

@@ -1,107 +1,136 @@
 // src/components/DailyReport.js
 import React, { useState } from 'react';
-import { View, Text, TextInput, Switch, Button, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Switch, Button, ScrollView } from 'react-native';
+import { db } from '../config/firebaseConfig';
+import { collection, addDoc } from 'firebase/firestore';
 
-const DailyReport = ({ selectedDate, onSave }) => {
+const DailyReport = ({ selectedDate }) => {
   const [isHappy, setIsHappy] = useState(false);
-  const [didCoco, setDidCoco] = useState(false);
-  const [didXixi, setDidXixi] = useState(false);
+  const [didPoop, setDidPoop] = useState(false);
+  const [didPee, setDidPee] = useState(false);
   const [isPottyTraining, setIsPottyTraining] = useState(false);
   const [ateLunch, setAteLunch] = useState(false);
   const [ateFruit, setAteFruit] = useState(false);
   const [participatedActivities, setParticipatedActivities] = useState(false);
-  const [observations, setObservations] = useState('');
+  const [observation, setObservation] = useState('');
 
-  const handleSave = () => {
+  const handleSubmit = async () => {
     const reportData = {
       date: selectedDate,
       isHappy,
-      didCoco,
-      didXixi,
+      didPoop,
+      didPee,
       isPottyTraining,
       ateLunch,
       ateFruit,
       participatedActivities,
-      observations,
+      observation,
+      createdAt: new Date(),
     };
 
-    // Aqui, você pode salvar os dados localmente ou no Firebase
-    onSave(reportData);
+    try {
+      await addDoc(collection(db, 'dailyReports'), reportData);
+      console.log('Relatório enviado:', reportData);
+      alert('Relatório enviado com sucesso!');
+
+      // Limpa os campos após enviar
+      setIsHappy(false);
+      setDidPoop(false);
+      setDidPee(false);
+      setIsPottyTraining(false);
+      setAteLunch(false);
+      setAteFruit(false);
+      setParticipatedActivities(false);
+      setObservation('');
+    } catch (error) {
+      console.error('Erro ao enviar relatório:', error);
+      alert('Erro ao enviar relatório. Tente novamente.');
+    }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.heading}>Resumo do Dia</Text>
+    <ScrollView style={styles.container}>
+      <Text style={styles.heading}>Relatório do Dia - {selectedDate}</Text>
 
-      <View style={styles.switchRow}>
-        <Text>Estava feliz?</Text>
+      <View style={styles.item}>
+        <Text style={styles.label}>Estava feliz?</Text>
         <Switch value={isHappy} onValueChange={setIsHappy} />
       </View>
 
-      <View style={styles.switchRow}>
-        <Text>Fez cocô?</Text>
-        <Switch value={didCoco} onValueChange={setDidCoco} />
+      <View style={styles.item}>
+        <Text style={styles.label}>Fez cocô?</Text>
+        <Switch value={didPoop} onValueChange={setDidPoop} />
       </View>
 
-      <View style={styles.switchRow}>
-        <Text>Fez xixi?</Text>
-        <Switch value={didXixi} onValueChange={setDidXixi} />
+      <View style={styles.item}>
+        <Text style={styles.label}>Fez xixi?</Text>
+        <Switch value={didPee} onValueChange={setDidPee} />
       </View>
 
-      <View style={styles.switchRow}>
-        <Text>Está desfraldando?</Text>
+      <View style={styles.item}>
+        <Text style={styles.label}>Está em desfralde?</Text>
         <Switch value={isPottyTraining} onValueChange={setIsPottyTraining} />
       </View>
 
-      <View style={styles.switchRow}>
-        <Text>Almoçou?</Text>
+      <View style={styles.item}>
+        <Text style={styles.label}>Almoçou?</Text>
         <Switch value={ateLunch} onValueChange={setAteLunch} />
       </View>
 
-      <View style={styles.switchRow}>
-        <Text>Comeu fruta?</Text>
+      <View style={styles.item}>
+        <Text style={styles.label}>Comeu fruta?</Text>
         <Switch value={ateFruit} onValueChange={setAteFruit} />
       </View>
 
-      <View style={styles.switchRow}>
-        <Text>Participou das atividades?</Text>
+      <View style={styles.item}>
+        <Text style={styles.label}>Participou das atividades?</Text>
         <Switch value={participatedActivities} onValueChange={setParticipatedActivities} />
       </View>
 
-      <TextInput
-        style={styles.textArea}
-        placeholder="Observações"
-        multiline
-        value={observations}
-        onChangeText={setObservations}
-      />
+      <View style={styles.item}>
+        <Text style={styles.label}>Observações:</Text>
+        <TextInput
+          style={styles.textInput}
+          placeholder="Escreva algo importante sobre o dia da criança..."
+          multiline
+          value={observation}
+          onChangeText={setObservation}
+        />
+      </View>
 
-      <Button title="Salvar" onPress={handleSave} />
-    </View>
+      <Button title="Enviar Relatório" onPress={handleSubmit} color="#1e3a8a" />
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     padding: 16,
+    backgroundColor: '#ffffff',
   },
   heading: {
     fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 10,
+    fontWeight: '600',
+    marginBottom: 20,
+    color: '#1e3a8a',
+    textAlign: 'center',
   },
-  switchRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 5,
+  item: {
+    marginBottom: 20,
   },
-  textArea: {
+  label: {
+    fontSize: 16,
+    color: '#1e293b',
+    marginBottom: 6,
+  },
+  textInput: {
     height: 100,
-    borderColor: '#ccc',
+    borderColor: '#cbd5e1',
     borderWidth: 1,
-    borderRadius: 8,
-    marginVertical: 10,
+    borderRadius: 10,
     padding: 10,
+    backgroundColor: '#f8fafc',
+    textAlignVertical: 'top',
   },
 });
 

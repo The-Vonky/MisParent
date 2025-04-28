@@ -35,13 +35,13 @@ const HomeScreen = () => {
         onNotificationPress={handleNotificationPress}
         onMessagePress={handleMessagePress}
       />
-      
+
       <ProfileMenu visible={menuVisible} onClose={() => setMenuVisible(false)} />
       <NotificationModal visible={notificationsVisible} onClose={() => setNotificationsVisible(false)} />
       <MessagesModal visible={messagesVisible} onClose={() => setMessagesVisible(false)} />
 
       <FlatList
-        data={[]} // Caso tenha dados reais para passar para a FlatList, coloque-os aqui
+        data={[]}
         ListHeaderComponent={
           <View style={styles.content}>
             <Calendar selectedDate={selectedDate} onDateChange={setSelectedDate} />
@@ -54,20 +54,18 @@ const HomeScreen = () => {
             <Divider />
             <Announcement />
             <Divider />
-            
-            {/* Adiciona o DailyReport aqui */}
-            {dailyReport ? (
-              <DailyReport date={selectedDate} onSaveReport={handleSaveReport} />
-            ) : (
-              <Text style={styles.noReport}>Sem informações para hoje.</Text>
-            )}
+
+            {/* Agora direto o DailyReport */}
+            <DailyReport selectedDate={selectedDate} />
+
             <Divider />
           </View>
         }
-        keyExtractor={(item, index) => index.toString()} // Altere o keyExtractor para garantir que seja único
-        renderItem={null} // Como você não está renderizando itens específicos, deixe como null
+        keyExtractor={(item, index) => index.toString()}
+        renderItem={null}
         showsVerticalScrollIndicator={false}
       />
+
     </SafeAreaView>
   );
 };
