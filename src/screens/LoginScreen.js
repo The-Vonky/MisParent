@@ -10,8 +10,7 @@ import {
 } from 'react-native';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../config/firebaseConfig';
-import Icon from 'react-native-vector-icons/Feather';
-
+import Icon from 'react-native-vector-icons/Feather';  // Importação correta do ícone
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
