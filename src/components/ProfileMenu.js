@@ -43,8 +43,6 @@ const ProfileMenu = ({ visible, onClose }) => {
     }
   }, [visible]);
 
-  if (!isVisible) return null; // Não renderiza a sidebar se não for visível
-
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents={visible ? 'auto' : 'none'}>
       {visible && (
@@ -57,7 +55,7 @@ const ProfileMenu = ({ visible, onClose }) => {
         style={[
           styles.menu,
           { transform: [{ translateX }] },
-          { zIndex: 9999 }, // Garante que a sidebar sobreponha tudo até sair
+          { zIndex: 9999 },
         ]}
       >
         <Text style={styles.title}>Menu</Text>
@@ -138,12 +136,12 @@ const styles = StyleSheet.create({
 
   menu: {
     position: 'absolute',
-    top: 0,
+    top: 34,
     left: 0,
     height: '100%',
     width: screenWidth * 0.75,
     backgroundColor: '#fff',
-    padding: 20,
+    padding: 15,
     elevation: 10,
     shadowColor: '#000',
     shadowOffset: { width: 2, height: 0 },
@@ -172,7 +170,7 @@ const styles = StyleSheet.create({
   },
 
   icon: {
-    marginRight: 12, // Adicionar mais espaço entre o ícone e o texto
+    marginRight: 12,
   },
 
   arrow: {
