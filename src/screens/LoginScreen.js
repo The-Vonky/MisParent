@@ -1,180 +1,97 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Image,
-  ImageBackground,
-  ActivityIndicator,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context'; // <-- IMPORTANTE
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth, firestore } from '../config/firebaseConfig';
-import { getDoc, doc } from 'firebase/firestore';
+// src/screens/AdminScreen.js
+import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 
-export default function LoginScreen({ navigation }) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [hidePassword, setHidePassword] = useState(true);
-  const [error, setError] = useState('');
-  const [loadingLogin, setLoadingLogin] = useState(false);
-
-  const handleLogin = async () => {
-    try {
-      setLoadingLogin(true);
-      setError('');
-
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-
-      const userDoc = await getDoc(doc(firestore, 'Users', user.uid));
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        const role = userData.role;
-
-        if (role === 'admin') {
-          navigation.replace('Admin');
-        } else {
-          navigation.replace('Home');
-        }
-      } else {
-        setError('Usuário não encontrado no banco de dados!');
-        setLoadingLogin(false);
-      }
-    } catch (err) {
-      setError('Email ou senha inválidos');
-      setLoadingLogin(false);
-    }
-  };
-
+export default function AdminScreen({ navigation }) {
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
-      <ImageBackground
-        source={require('../../assets/Background-Login.png')}
-        style={styles.background}
-        resizeMode="cover"
-      >
-        <View style={styles.overlay}>
-          <Image
-            source={require('../../assets/Logo.png')}
-            style={styles.logo}
-          />
+    <View style={styles.container}>
+      {/* Cabeçalho */}
+      <View style={styles.header}>
+        <Text style={styles.headerText}>Painel do Administrador</Text>
+      </View>
 
-          <TextInput
-            style={styles.input}
-            placeholder="E-mail"
-            placeholderTextColor="#999"
-            value={email}
-            onChangeText={setEmail}
-            autoCapitalize="none"
-            keyboardType="email-address"
-          />
+      {/* Conteúdo principal */}
+      <ScrollView contentContainerStyle={styles.content}>
+        <Card
+          title="Grade de horários"
+          icon="calendar"
+          onPress={() => console.log('Ir para Grade')}
+        />
+        <Card
+          title="Relatório diário"
+          icon="file-text"
+          onPress={() => console.log('Ir para Relatório')}
+        />
+        <Card
+          title="Alertas / Recados"
+          icon="bell"
+          onPress={() => console.log('Ir para Alertas')}
+        />
+        <Card
+          title="Mensagens"
+          icon="message-circle"
+          onPress={() => console.log('Ir para Mensagens')}
+        />
+        <Card
+          title="Configurações"
+          icon="settings"
+          onPress={() => console.log('Ir para Configurações')}
+        />
+      </ScrollView>
+    </View>
+  );
+}
 
-          <View style={styles.passwordContainer}>
-            <TextInput
-              style={styles.inputPassword}
-              placeholder="Senha"
-              placeholderTextColor="#999"
-              secureTextEntry={hidePassword}
-              value={password}
-              onChangeText={setPassword}
-            />
-            <TouchableOpacity onPress={() => setHidePassword(!hidePassword)}>
-              <Icon
-                name={hidePassword ? 'eye-off' : 'eye'}
-                size={20}
-                color="#999"
-              />
-            </TouchableOpacity>
-          </View>
-
-          {error ? <Text style={styles.error}>{error}</Text> : null}
-
-          <TouchableOpacity
-            style={[styles.button, loadingLogin && { backgroundColor: '#555' }]}
-            onPress={handleLogin}
-            disabled={loadingLogin}
-          >
-            {loadingLogin ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.buttonText}>Entrar</Text>
-            )}
-          </TouchableOpacity>
-
-          <TouchableOpacity>
-            <Text style={styles.forgotPassword}>Esqueceu a senha?</Text>
-          </TouchableOpacity>
-        </View>
-      </ImageBackground>
-    </SafeAreaView>
+function Card({ title, icon, onPress }) {
+  return (
+    <TouchableOpacity style={styles.card} onPress={onPress}>
+      <Icon name={icon} size={24} color="#1e3a8a" style={styles.icon} />
+      <Text style={styles.cardText}>{title}</Text>
+    </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
-  background: {
+  container: {
     flex: 1,
-    justifyContent: 'center',
+    backgroundColor: '#f4f6fa',
   },
-  overlay: {
-    padding: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.09)',
-    margin: 20,
-    borderRadius: 20,
-  },
-  logo: {
-    width: 195,
-    height: 195,
-    alignSelf: 'center',
-    marginBottom: 30,
-    resizeMode: 'contain',
-  },
-  input: {
-    height: 50,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    paddingHorizontal: 15,
-    borderRadius: 10,
-    marginBottom: 15,
-    backgroundColor: '#fff',
-  },
-  passwordContainer: {
-    flexDirection: 'row',
+  header: {
+    paddingTop: 60,
+    paddingBottom: 20,
+    backgroundColor: '#1e3a8a',
     alignItems: 'center',
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 15,
-    backgroundColor: '#fff',
-    marginBottom: 15,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
   },
-  inputPassword: {
-    flex: 1,
-    height: 50,
-  },
-  button: {
-    backgroundColor: '#00008B',
-    paddingVertical: 15,
-    borderRadius: 10,
-    marginBottom: 10,
-    alignItems: 'center',
-  },
-  buttonText: {
+  headerText: {
     color: '#fff',
+    fontSize: 20,
     fontWeight: 'bold',
   },
-  forgotPassword: {
-    marginTop: 10,
-    textAlign: 'center',
-    color: '#555',
-    textDecorationLine: 'underline',
+  content: {
+    padding: 20,
   },
-  error: {
-    color: 'red',
-    marginBottom: 10,
-    textAlign: 'center',
+  card: {
+    backgroundColor: '#fff',
+    padding: 20,
+    marginBottom: 15,
+    borderRadius: 15,
+    flexDirection: 'row',
+    alignItems: 'center',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  icon: {
+    marginRight: 15,
+  },
+  cardText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1e3a8a',
   },
 });
