@@ -1,9 +1,11 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { SafeAreaView } from 'react-native';  // Importar SafeAreaView
+import { SafeAreaView } from 'react-native';
 import LoginScreen from '../screens/LoginScreen';
 import HomeScreen from '../screens/HomeScreen';
 import AdminScreen from '../screens/AdminScreen';
+import CadastrarAlunoScreen from '../screens/CadastrarAlunoScreen';
+import RelatorioDiarioScreen from '../screens/RelatorioDiarioScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -26,6 +28,17 @@ export default function StackNavigator() {
           component={AdminScreen}
           options={{ headerShown: false }}
         />
+        <Stack.Screen
+          name="RelatorioDiario"
+          component={RelatorioDiarioScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="CadastrarAluno"
+          component={CadastrarAlunoScreen}
+          options={{ headerShown: false }}
+        />
+
       </Stack.Navigator>
     </SafeAreaView>
   );
