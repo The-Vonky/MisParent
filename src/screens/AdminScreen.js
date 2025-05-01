@@ -1,25 +1,97 @@
 // src/screens/AdminScreen.js
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import Icon from 'react-native-vector-icons/Feather';
 
-export default function AdminScreen() {
+export default function AdminScreen({ navigation }) {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Tela de Administração</Text>
+      {/* Cabeçalho */}
+      <View style={styles.header}>
+        <Text style={styles.headerText}>Painel do Administrador</Text>
+      </View>
+
+      {/* Conteúdo principal */}
+      <ScrollView contentContainerStyle={styles.content}>
+        <Card
+          title="Grade de horários"
+          icon="calendar"
+          onPress={() => console.log('Ir para Grade')}
+        />
+        <Card
+          title="Relatório diário"
+          icon="file-text"
+          onPress={() => console.log('Ir para Relatório')}
+        />
+        <Card
+          title="Alertas / Recados"
+          icon="bell"
+          onPress={() => console.log('Ir para Alertas')}
+        />
+        <Card
+          title="Mensagens"
+          icon="message-circle"
+          onPress={() => console.log('Ir para Mensagens')}
+        />
+        <Card
+          title="Configurações"
+          icon="settings"
+          onPress={() => console.log('Ir para Configurações')}
+        />
+      </ScrollView>
     </View>
+  );
+}
+
+function Card({ title, icon, onPress }) {
+  return (
+    <TouchableOpacity style={styles.card} onPress={onPress}>
+      <Icon name={icon} size={24} color="#1e3a8a" style={styles.icon} />
+      <Text style={styles.cardText}>{title}</Text>
+    </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: '#f4f6fa',
   },
-  title: {
-    fontSize: 24,
+  header: {
+    paddingTop: 60,
+    paddingBottom: 20,
+    backgroundColor: '#1e3a8a',
+    alignItems: 'center',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+  },
+  headerText: {
+    color: '#fff',
+    fontSize: 20,
     fontWeight: 'bold',
+  },
+  content: {
+    padding: 20,
+  },
+  card: {
+    backgroundColor: '#fff',
+    padding: 20,
+    marginBottom: 15,
+    borderRadius: 15,
+    flexDirection: 'row',
+    alignItems: 'center',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  icon: {
+    marginRight: 15,
+  },
+  cardText: {
+    fontSize: 16,
+    fontWeight: '600',
     color: '#1e3a8a',
   },
 });

@@ -26,6 +26,12 @@ export default function StackNavigator() {
           component={AdminScreen}
           options={{ headerShown: false }}
         />
+        <Stack.Screen
+          name="CadastrarAluno"
+          component={CadastrarAlunoScreen}
+          options={{ headerShown: false }}
+        />
+
       </Stack.Navigator>
     </SafeAreaView>
   );

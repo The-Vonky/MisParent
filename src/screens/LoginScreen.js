@@ -1,97 +1,160 @@
-// src/screens/AdminScreen.js
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+  ImageBackground,
+  ActivityIndicator,
+} from 'react-native';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../config/firebaseConfig';
 import Icon from 'react-native-vector-icons/Feather';
 
-export default function AdminScreen({ navigation }) {
+export default function LoginScreen() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [hidePassword, setHidePassword] = useState(true);
+  const [error, setError] = useState('');
+  const [loadingLogin, setLoadingLogin] = useState(false);
+
+  const handleLogin = async () => {
+    try {
+      setLoadingLogin(true);
+      setError('');
+      await signInWithEmailAndPassword(auth, email, password);
+      // Não faz navegação aqui! StackNavigator cuida disso
+    } catch (err) {
+      setError('Email ou senha inválidos');
+      setLoadingLogin(false);
+    }
+  };
+
   return (
-    <View style={styles.container}>
-      {/* Cabeçalho */}
-      <View style={styles.header}>
-        <Text style={styles.headerText}>Painel do Administrador</Text>
+    <ImageBackground
+      source={require('../../assets/Background-Login.png')}
+      style={styles.background}
+      resizeMode="cover"
+    >
+      <View style={styles.overlay}>
+        <Image
+          source={require('../../assets/Logo.png')}
+          style={styles.logo}
+        />
+
+        <TextInput
+          style={styles.input}
+          placeholder="E-mail"
+          placeholderTextColor="#999"
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+          keyboardType="email-address"
+        />
+
+        <View style={styles.passwordContainer}>
+          <TextInput
+            style={styles.inputPassword}
+            placeholder="Senha"
+            placeholderTextColor="#999"
+            secureTextEntry={hidePassword}
+            value={password}
+            onChangeText={setPassword}
+          />
+          <TouchableOpacity onPress={() => setHidePassword(!hidePassword)}>
+            <Icon
+              name={hidePassword ? 'eye-off' : 'eye'}
+              size={20}
+              color="#999"
+            />
+          </TouchableOpacity>
+        </View>
+
+        {error ? <Text style={styles.error}>{error}</Text> : null}
+
+        <TouchableOpacity
+          style={[styles.button, loadingLogin && { backgroundColor: '#555' }]}
+          onPress={handleLogin}
+          disabled={loadingLogin}
+        >
+          {loadingLogin ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Entrar</Text>
+          )}
+        </TouchableOpacity>
+
+        <TouchableOpacity>
+          <Text style={styles.forgotPassword}>Esqueceu a senha?</Text>
+        </TouchableOpacity>
       </View>
-
-      {/* Conteúdo principal */}
-      <ScrollView contentContainerStyle={styles.content}>
-        <Card
-          title="Grade de horários"
-          icon="calendar"
-          onPress={() => console.log('Ir para Grade')}
-        />
-        <Card
-          title="Relatório diário"
-          icon="file-text"
-          onPress={() => console.log('Ir para Relatório')}
-        />
-        <Card
-          title="Alertas / Recados"
-          icon="bell"
-          onPress={() => console.log('Ir para Alertas')}
-        />
-        <Card
-          title="Mensagens"
-          icon="message-circle"
-          onPress={() => console.log('Ir para Mensagens')}
-        />
-        <Card
-          title="Configurações"
-          icon="settings"
-          onPress={() => console.log('Ir para Configurações')}
-        />
-      </ScrollView>
-    </View>
-  );
-}
-
-function Card({ title, icon, onPress }) {
-  return (
-    <TouchableOpacity style={styles.card} onPress={onPress}>
-      <Icon name={icon} size={24} color="#1e3a8a" style={styles.icon} />
-      <Text style={styles.cardText}>{title}</Text>
-    </TouchableOpacity>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  background: {
     flex: 1,
-    backgroundColor: '#f4f6fa',
+    justifyContent: 'center',
   },
-  header: {
-    paddingTop: 60,
-    paddingBottom: 20,
-    backgroundColor: '#1e3a8a',
-    alignItems: 'center',
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-  },
-  headerText: {
-    color: '#fff',
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  content: {
+  overlay: {
     padding: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.09)',
+    margin: 20,
+    borderRadius: 20,
   },
-  card: {
-    backgroundColor: '#fff',
-    padding: 20,
+  logo: {
+    width: 195,
+    height: 195,
+    alignSelf: 'center',
+    marginBottom: 30,
+    resizeMode: 'contain',
+  },
+  input: {
+    height: 50,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    paddingHorizontal: 15,
+    borderRadius: 10,
     marginBottom: 15,
-    borderRadius: 15,
+    backgroundColor: '#fff',
+  },
+  passwordContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    backgroundColor: '#fff',
+    marginBottom: 15,
   },
-  icon: {
-    marginRight: 15,
+  inputPassword: {
+    flex: 1,
+    height: 50,
   },
-  cardText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1e3a8a',
+  button: {
+    backgroundColor: '#00008B',
+    paddingVertical: 15,
+    borderRadius: 10,
+    marginBottom: 10,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  forgotPassword: {
+    marginTop: 10,
+    textAlign: 'center',
+    color: '#555',
+    textDecorationLine: 'underline',
+  },
+  error: {
+    color: 'red',
+    marginBottom: 10,
+    textAlign: 'center',
   },
 });
