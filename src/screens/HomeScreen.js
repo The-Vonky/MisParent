@@ -9,7 +9,7 @@ import Divider from '../components/Divider';
 import ProfileMenu from '../components/ProfileMenu';
 import MessagesModal from '../components/MessagesModal';
 import NotificationModal from '../components/NotificationModal';
-import DailyReport from '../components/DailyReport'; // Importando o componente DailyReport
+import DailyReport from '../components/DailyReport';
 import { Text } from 'react-native';
 
 const HomeScreen = () => {

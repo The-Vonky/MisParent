@@ -21,7 +21,7 @@ export default function AdminScreen({ navigation }) {
         <Card
           title="Relatório diário"
           icon="file-text"
-          onPress={() => console.log('Ir para Relatório')}
+          onPress={() => navigation.navigate('RelatorioDiario')}
         />
         <Card
           title="Alertas / Recados"
@@ -32,6 +32,11 @@ export default function AdminScreen({ navigation }) {
           title="Mensagens"
           icon="message-circle"
           onPress={() => console.log('Ir para Mensagens')}
+        />
+        <Card
+          title="Cadastrar Aluno"
+          icon="user"
+          onPress={() => navigation.navigate('CadastrarAluno')}
         />
         <Card
           title="Configurações"
