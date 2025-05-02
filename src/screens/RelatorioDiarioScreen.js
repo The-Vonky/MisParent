@@ -1,16 +1,14 @@
 // src/screens/RelatorioDiarioScreen.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  TextInput,
-  ScrollView,
-  SafeAreaView
+  View, Text, StyleSheet, TouchableOpacity, TextInput,
+  ScrollView, SafeAreaView
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import CheckBox from '@react-native-community/checkbox';
+import { Picker } from '@react-native-picker/picker';
+import { firestore } from '../config/firebaseConfig';
+import { collection, getDocs, addDoc } from 'firebase/firestore';
 
 const humores = [
   { label: 'Muito Feliz', icon: '😄' },
@@ -21,15 +19,51 @@ const humores = [
 ];
 
 export default function RelatorioDiarioScreen() {
+  const [alunoSelecionado, setAlunoSelecionado] = useState('');
+  const [alunos, setAlunos] = useState([]);
   const [humorSelecionado, setHumorSelecionado] = useState(null);
-  const [coco, setCoco] = useState(false);
-  const [xixi, setXixi] = useState(false);
-  const [alimentacao, setAlimentacao] = useState(false);
+  const [coco, setCoco] = useState(null);
+  const [xixi, setXixi] = useState(null);
+  const [alimentacao, setAlimentacao] = useState(null);
   const [observacoes, setObservacoes] = useState('');
 
-  const handleSubmit = () => {
-    // lógica para salvar no Firebase
-    console.log({ humorSelecionado, coco, xixi, alimentacao, observacoes });
+  useEffect(() => {
+    async function carregarAlunos() {
+      const snapshot = await getDocs(collection(firestore, 'alunos'));
+      const lista = snapshot.docs.map(doc => ({
+        id: doc.id,
+        nome: doc.data().nome,
+      }));
+      setAlunos(lista);
+    }
+    carregarAlunos();
+  }, []);
+
+  const handleSubmit = async () => {
+    if (!alunoSelecionado || !humorSelecionado || coco === null || xixi === null || alimentacao === null) {
+      alert('Preencha todos os campos obrigatórios.');
+      return;
+    }
+
+    const dataAtual = new Date().toISOString().split('T')[0];
+
+    await addDoc(collection(firestore, 'relatorios'), {
+      alunoId: alunoSelecionado,
+      data: dataAtual,
+      humor: humorSelecionado,
+      coco,
+      xixi,
+      alimentacao,
+      observacoes,
+    });
+
+    alert('Relatório salvo com sucesso!');
+    // Limpar estados
+    setHumorSelecionado(null);
+    setCoco(null);
+    setXixi(null);
+    setAlimentacao(null);
+    setObservacoes('');
   };
 
   return (
@@ -38,16 +72,27 @@ export default function RelatorioDiarioScreen() {
         <Text style={styles.headerText}>Relatório Diário</Text>
       </View>
       <ScrollView contentContainerStyle={styles.container}>
+        {/* Selecionar aluno */}
+        <Text style={styles.sectionTitle}>Selecione o Aluno</Text>
+        <View style={styles.pickerContainer}>
+          <Picker
+            selectedValue={alunoSelecionado}
+            onValueChange={itemValue => setAlunoSelecionado(itemValue)}
+          >
+            <Picker.Item label="Selecione um aluno..." value="" />
+            {alunos.map(aluno => (
+              <Picker.Item key={aluno.id} label={aluno.nome} value={aluno.id} />
+            ))}
+          </Picker>
+        </View>
+
         {/* Humor */}
         <Text style={styles.sectionTitle}>Humor</Text>
         <View style={styles.humorContainer}>
           {humores.map((h, index) => (
             <TouchableOpacity
               key={index}
-              style={[
-                styles.humorOption,
-                humorSelecionado === h.label && styles.humorSelected,
-              ]}
+              style={[styles.humorOption, humorSelecionado === h.label && styles.humorSelected]}
               onPress={() => setHumorSelecionado(h.label)}
             >
               <Text style={styles.humorIcon}>{h.icon}</Text>
@@ -57,25 +102,14 @@ export default function RelatorioDiarioScreen() {
 
         {/* Higiene */}
         <Text style={styles.sectionTitle}>Higiene</Text>
-        <View style={styles.checkboxContainer}>
-          <CheckBox value={coco} onValueChange={setCoco} tintColors={{ true: '#1e3a8a', false: '#ccc' }} />
-          <Text style={styles.checkboxLabel}>Cocô</Text>
-        </View>
-        <View style={styles.checkboxContainer}>
-          <CheckBox value={xixi} onValueChange={setXixi} tintColors={{ true: '#1e3a8a', false: '#ccc' }} />
-          <Text style={styles.checkboxLabel}>Xixi</Text>
+        <View style={styles.checkboxGroup}>
+          <CheckRow label="Cocô" value={coco} setValue={setCoco} />
+          <CheckRow label="Xixi" value={xixi} setValue={setXixi} />
         </View>
 
         {/* Alimentação */}
         <Text style={styles.sectionTitle}>Alimentação</Text>
-        <View style={styles.checkboxContainer}>
-          <CheckBox
-            value={alimentacao}
-            onValueChange={setAlimentacao}
-            tintColors={{ true: '#1e3a8a', false: '#ccc' }}
-          />
-          <Text style={styles.checkboxLabel}>Alimentou-se bem</Text>
-        </View>
+        <CheckRow label="Alimentou-se bem" value={alimentacao} setValue={setAlimentacao} />
 
         {/* Observações */}
         <Text style={styles.sectionTitle}>Observações</Text>
@@ -95,6 +129,28 @@ export default function RelatorioDiarioScreen() {
   );
 }
 
+function CheckRow({ label, value, setValue }) {
+  return (
+    <View style={styles.checkboxContainer}>
+      <TouchableOpacity
+        style={styles.radio}
+        onPress={() => setValue(true)}
+      >
+        <View style={[styles.radioCircle, value === true && styles.radioSelected]} />
+        <Text style={styles.checkboxLabel}>Sim</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.radio}
+        onPress={() => setValue(false)}
+      >
+        <View style={[styles.radioCircle, value === false && styles.radioSelected]} />
+        <Text style={styles.checkboxLabel}>Não</Text>
+      </TouchableOpacity>
+      <Text style={styles.checkboxLabel}>{label}</Text>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   header: {
     paddingTop: 60,
@@ -111,6 +167,13 @@ const styles = StyleSheet.create({
   },
   container: {
     padding: 20,
+  },
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    overflow: 'hidden',
+    marginBottom: 10,
   },
   sectionTitle: {
     fontSize: 18,
@@ -134,14 +197,34 @@ const styles = StyleSheet.create({
   humorIcon: {
     fontSize: 24,
   },
+  checkboxGroup: {
+    marginBottom: 10,
+  },
   checkboxContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 12,
   },
   checkboxLabel: {
     fontSize: 16,
-    marginLeft: 8,
+    marginHorizontal: 8,
+    color: '#1e3a8a',
+  },
+  radio: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  radioCircle: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: '#1e3a8a',
+    marginRight: 4,
+  },
+  radioSelected: {
+    backgroundColor: '#1e3a8a',
   },
   input: {
     borderWidth: 1,
@@ -150,6 +233,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     minHeight: 100,
     textAlignVertical: 'top',
+    backgroundColor: '#fff',
   },
   button: {
     backgroundColor: '#1e3a8a',
