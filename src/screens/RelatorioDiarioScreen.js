@@ -1,8 +1,14 @@
 // src/screens/RelatorioDiarioScreen.js
 import React, { useState, useEffect } from 'react';
 import {
-  View, Text, StyleSheet, TouchableOpacity, TextInput,
-  ScrollView, SafeAreaView
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  TextInput,
+  ScrollView,
+  SafeAreaView,
+  Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import CheckBox from '@react-native-community/checkbox';
@@ -20,50 +26,62 @@ const humores = [
 
 export default function RelatorioDiarioScreen() {
   const [alunoSelecionado, setAlunoSelecionado] = useState('');
-  const [alunos, setAlunos] = useState([]);
+  const [listaAlunos, setListaAlunos] = useState([]);
+  const [dataRelatorio, setDataRelatorio] = useState('');
   const [humorSelecionado, setHumorSelecionado] = useState(null);
-  const [coco, setCoco] = useState(null);
-  const [xixi, setXixi] = useState(null);
-  const [alimentacao, setAlimentacao] = useState(null);
+  const [coco, setCoco] = useState(false);
+  const [xixi, setXixi] = useState(false);
+  const [alimentacao, setAlimentacao] = useState(false);
   const [observacoes, setObservacoes] = useState('');
 
   useEffect(() => {
     async function carregarAlunos() {
-      const snapshot = await getDocs(collection(firestore, 'alunos'));
-      const lista = snapshot.docs.map(doc => ({
-        id: doc.id,
-        nome: doc.data().nome,
-      }));
-      setAlunos(lista);
+      try {
+        const querySnapshot = await getDocs(collection(firestore, 'alunos'));
+        const alunos = [];
+        querySnapshot.forEach((doc) => {
+          alunos.push({ id: doc.id, ...doc.data() });
+        });
+        setListaAlunos(alunos);
+      } catch (error) {
+        console.error('Erro ao buscar alunos:', error);
+      }
     }
     carregarAlunos();
   }, []);
 
   const handleSubmit = async () => {
-    if (!alunoSelecionado || !humorSelecionado || coco === null || xixi === null || alimentacao === null) {
-      alert('Preencha todos os campos obrigatórios.');
+    if (!alunoSelecionado || !humorSelecionado) {
+      Alert.alert('Erro', 'Preencha todos os campos obrigatórios.');
       return;
     }
 
-    const dataAtual = new Date().toISOString().split('T')[0];
+    const data = dataRelatorio || new Date().toISOString().split('T')[0];
 
-    await addDoc(collection(firestore, 'relatorios'), {
+    const relatorio = {
       alunoId: alunoSelecionado,
-      data: dataAtual,
+      data,
       humor: humorSelecionado,
       coco,
       xixi,
       alimentacao,
       observacoes,
-    });
+    };
 
-    alert('Relatório salvo com sucesso!');
-    // Limpar estados
-    setHumorSelecionado(null);
-    setCoco(null);
-    setXixi(null);
-    setAlimentacao(null);
-    setObservacoes('');
+    try {
+      await addDoc(collection(firestore, 'relatorios'), relatorio);
+      Alert.alert('Sucesso', 'Relatório salvo com sucesso!');
+      // Limpa os campos
+      setHumorSelecionado(null);
+      setCoco(false);
+      setXixi(false);
+      setAlimentacao(false);
+      setObservacoes('');
+      setDataRelatorio('');
+    } catch (error) {
+      Alert.alert('Erro', 'Não foi possível salvar o relatório.');
+      console.error(error);
+    }
   };
 
   return (
@@ -72,15 +90,25 @@ export default function RelatorioDiarioScreen() {
         <Text style={styles.headerText}>Relatório Diário</Text>
       </View>
       <ScrollView contentContainerStyle={styles.container}>
-        {/* Selecionar aluno */}
-        <Text style={styles.sectionTitle}>Selecione o Aluno</Text>
+        {/* Data */}
+        <Text style={styles.sectionTitle}>Data do Relatório</Text>
+        <TextInput
+          placeholder="YYYY-MM-DD"
+          style={styles.input}
+          value={dataRelatorio}
+          onChangeText={setDataRelatorio}
+        />
+
+        {/* Seleção de Aluno */}
+        <Text style={styles.sectionTitle}>Aluno</Text>
         <View style={styles.pickerContainer}>
           <Picker
             selectedValue={alunoSelecionado}
-            onValueChange={itemValue => setAlunoSelecionado(itemValue)}
+            onValueChange={(itemValue) => setAlunoSelecionado(itemValue)}
+            style={styles.picker}
           >
-            <Picker.Item label="Selecione um aluno..." value="" />
-            {alunos.map(aluno => (
+            <Picker.Item label="Selecione um aluno" value="" />
+            {listaAlunos.map((aluno) => (
               <Picker.Item key={aluno.id} label={aluno.nome} value={aluno.id} />
             ))}
           </Picker>
@@ -92,7 +120,10 @@ export default function RelatorioDiarioScreen() {
           {humores.map((h, index) => (
             <TouchableOpacity
               key={index}
-              style={[styles.humorOption, humorSelecionado === h.label && styles.humorSelected]}
+              style={[
+                styles.humorOption,
+                humorSelecionado === h.label && styles.humorSelected,
+              ]}
               onPress={() => setHumorSelecionado(h.label)}
             >
               <Text style={styles.humorIcon}>{h.icon}</Text>
@@ -102,14 +133,25 @@ export default function RelatorioDiarioScreen() {
 
         {/* Higiene */}
         <Text style={styles.sectionTitle}>Higiene</Text>
-        <View style={styles.checkboxGroup}>
-          <CheckRow label="Cocô" value={coco} setValue={setCoco} />
-          <CheckRow label="Xixi" value={xixi} setValue={setXixi} />
+        <View style={styles.checkboxContainer}>
+          <CheckBox value={coco} onValueChange={setCoco} tintColors={{ true: '#1e3a8a', false: '#ccc' }} />
+          <Text style={styles.checkboxLabel}>Fez cocô</Text>
+        </View>
+        <View style={styles.checkboxContainer}>
+          <CheckBox value={xixi} onValueChange={setXixi} tintColors={{ true: '#1e3a8a', false: '#ccc' }} />
+          <Text style={styles.checkboxLabel}>Fez xixi</Text>
         </View>
 
         {/* Alimentação */}
         <Text style={styles.sectionTitle}>Alimentação</Text>
-        <CheckRow label="Alimentou-se bem" value={alimentacao} setValue={setAlimentacao} />
+        <View style={styles.checkboxContainer}>
+          <CheckBox
+            value={alimentacao}
+            onValueChange={setAlimentacao}
+            tintColors={{ true: '#1e3a8a', false: '#ccc' }}
+          />
+          <Text style={styles.checkboxLabel}>Alimentou-se bem</Text>
+        </View>
 
         {/* Observações */}
         <Text style={styles.sectionTitle}>Observações</Text>
@@ -129,28 +171,6 @@ export default function RelatorioDiarioScreen() {
   );
 }
 
-function CheckRow({ label, value, setValue }) {
-  return (
-    <View style={styles.checkboxContainer}>
-      <TouchableOpacity
-        style={styles.radio}
-        onPress={() => setValue(true)}
-      >
-        <View style={[styles.radioCircle, value === true && styles.radioSelected]} />
-        <Text style={styles.checkboxLabel}>Sim</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.radio}
-        onPress={() => setValue(false)}
-      >
-        <View style={[styles.radioCircle, value === false && styles.radioSelected]} />
-        <Text style={styles.checkboxLabel}>Não</Text>
-      </TouchableOpacity>
-      <Text style={styles.checkboxLabel}>{label}</Text>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   header: {
     paddingTop: 60,
@@ -167,13 +187,6 @@ const styles = StyleSheet.create({
   },
   container: {
     padding: 20,
-  },
-  pickerContainer: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    overflow: 'hidden',
-    marginBottom: 10,
   },
   sectionTitle: {
     fontSize: 18,
@@ -197,43 +210,22 @@ const styles = StyleSheet.create({
   humorIcon: {
     fontSize: 24,
   },
-  checkboxGroup: {
-    marginBottom: 10,
-  },
   checkboxContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 10,
   },
   checkboxLabel: {
     fontSize: 16,
-    marginHorizontal: 8,
-    color: '#1e3a8a',
-  },
-  radio: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  radioCircle: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    borderWidth: 2,
-    borderColor: '#1e3a8a',
-    marginRight: 4,
-  },
-  radioSelected: {
-    backgroundColor: '#1e3a8a',
+    marginLeft: 8,
   },
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
     padding: 12,
     borderRadius: 8,
-    minHeight: 100,
+    minHeight: 50,
     textAlignVertical: 'top',
-    backgroundColor: '#fff',
   },
   button: {
     backgroundColor: '#1e3a8a',
@@ -245,5 +237,15 @@ const styles = StyleSheet.create({
     color: '#fff',
     textAlign: 'center',
     fontWeight: 'bold',
+  },
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  picker: {
+    height: 50,
+    width: '100%',
   },
 });
