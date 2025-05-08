@@ -1,7 +1,7 @@
 // src/screens/admin/MessagesScreen.js
 import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
-import { firestore } from '../../config/firebaseConfig';
+import { firestore } from '../config/firebaseConfig';
 import { collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from 'firebase/firestore';
 
 export default function MessagesScreen() {
