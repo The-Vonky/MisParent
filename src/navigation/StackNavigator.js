@@ -6,6 +6,9 @@ import HomeScreen from '../screens/HomeScreen';
 import AdminScreen from '../screens/AdminScreen';
 import CadastrarAlunoScreen from '../screens/CadastrarAlunoScreen';
 import RelatorioDiarioScreen from '../screens/RelatorioDiarioScreen';
+import AlertasScreen from '../screens/AlertasScreen';
+import SettingsScreen from '../screens/SettingsScreen';
+import MessagesScreen from '../screens/MessagesScreen';
 
 const Stack = createNativeStackNavigator();
 

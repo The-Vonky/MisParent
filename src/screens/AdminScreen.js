@@ -26,12 +26,12 @@ export default function AdminScreen({ navigation }) {
         <Card
           title="Alertas / Recados"
           icon="bell"
-          onPress={() => console.log('Ir para Alertas')}
+          onPress={() => navigation.navigate('Alertas')}
         />
         <Card
           title="Mensagens"
           icon="message-circle"
-          onPress={() => console.log('Ir para Mensagens')}
+          onPress={() => navigation.navigate('Messages')}
         />
         <Card
           title="Cadastrar Aluno"
@@ -41,7 +41,7 @@ export default function AdminScreen({ navigation }) {
         <Card
           title="Configurações"
           icon="settings"
-          onPress={() => console.log('Ir para Configurações')}
+          onPress={() => navigation.navigate('Settings')}
         />
       </ScrollView>
     </View>
