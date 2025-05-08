@@ -38,6 +38,21 @@ export default function StackNavigator() {
           component={CadastrarAlunoScreen}
           options={{ headerShown: false }}
         />
+        <Stack.Screen
+          name="Alertas"
+          component={AlertasScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Settings"
+          component={SettingsScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Messages"
+          component={MessagesScreen}
+          options={{ headerShown: false }}
+        />
 
       </Stack.Navigator>
     </SafeAreaView>
