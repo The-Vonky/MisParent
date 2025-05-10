@@ -1,89 +1,126 @@
-// src/screens/admin/MessagesScreen.js
 import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
+import { collection, addDoc, query, where, onSnapshot, updateDoc, doc } from 'firebase/firestore';
 import { firestore } from '../config/firebaseConfig';
-import { collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from 'firebase/firestore';
+import { useNavigation } from '@react-navigation/native';
+import { auth } from '../config/firebaseConfig';
 
 export default function MessagesScreen() {
+  const navigation = useNavigation();
+  const currentUser = auth.currentUser;
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState('');
+  const [recipientId, setRecipientId] = useState('admin'); // Pode mudar se o adm quiser mandar p/ alguém específico
 
   useEffect(() => {
-    const q = query(collection(firestore, 'messages'), orderBy('createdAt', 'desc'));
+    const messagesRef = collection(firestore, 'messages');
+
+    const q = query(
+      messagesRef,
+      where('participants', 'array-contains', currentUser.uid)
+    );
+
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const msgs = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setMessages(msgs);
+      const msgs = [];
+      snapshot.forEach((doc) => {
+        msgs.push({ id: doc.id, ...doc.data() });
+      });
+      setMessages(msgs.sort((a, b) => a.timestamp - b.timestamp));
     });
 
     return () => unsubscribe();
   }, []);
 
   const sendMessage = async () => {
-    if (text.trim()) {
-      await addDoc(collection(firestore, 'messages'), {
-        text: text.trim(),
-        sender: 'Admin',
-        createdAt: serverTimestamp(),
-      });
-      setText('');
-    }
+    if (text.trim() === '') return;
+
+    await addDoc(collection(firestore, 'messages'), {
+      text,
+      senderId: currentUser.uid,
+      recipientId,
+      participants: [currentUser.uid, recipientId],
+      timestamp: Date.now(),
+      read: false,
+    });
+
+    setText('');
+  };
+
+  const markAsRead = async (messageId) => {
+    const msgRef = doc(firestore, 'messages', messageId);
+    await updateDoc(msgRef, { read: true });
   };
 
   return (
     <View style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.navigate('Admin')}>
+          <Text style={styles.backButton}>← Voltar</Text>
+        </TouchableOpacity>
+        <Text style={styles.title}>Mensagens</Text>
+      </View>
+
       <FlatList
         data={messages}
-        keyExtractor={(item) => item.id}
-        inverted
         renderItem={({ item }) => (
-          <View style={styles.messageContainer}>
-            <Text style={styles.sender}>{item.sender}:</Text>
-            <Text style={styles.message}>{item.text}</Text>
-          </View>
+          <TouchableOpacity
+            style={[styles.message, item.read ? null : styles.unread]}
+            onPress={() => markAsRead(item.id)}
+          >
+            <Text style={styles.sender}>{item.senderId === currentUser.uid ? 'Você' : 'Outro'}:</Text>
+            <Text>{item.text}</Text>
+          </TouchableOpacity>
         )}
+        keyExtractor={(item) => item.id}
       />
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Digite uma mensagem..."
-          value={text}
-          onChangeText={setText}
-        />
-        <TouchableOpacity style={styles.button} onPress={sendMessage}>
-          <Text style={styles.buttonText}>Enviar</Text>
-        </TouchableOpacity>
-      </View>
+
+      <TextInput
+        placeholder="Digite sua mensagem"
+        value={text}
+        onChangeText={setText}
+        style={styles.input}
+      />
+
+      <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
+        <Text style={styles.sendText}>Enviar</Text>
+      </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 10 },
-  messageContainer: { marginBottom: 10 },
-  sender: { fontWeight: 'bold' },
-  message: { fontSize: 16 },
-  inputContainer: {
-    flexDirection: 'row',
-    paddingVertical: 10,
-    borderTopWidth: 1,
-    borderColor: '#ccc',
-  },
+  container: { flex: 1, padding: 16, backgroundColor: '#f0f0f0' },
+  header: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
+  backButton: { fontSize: 18, color: 'blue', marginRight: 10 },
+  title: { fontSize: 20, fontWeight: 'bold' },
   input: {
-    flex: 1,
-    borderWidth: 1,
+    backgroundColor: '#fff',
+    padding: 10,
+    borderRadius: 8,
+    marginTop: 10,
     borderColor: '#ccc',
-    borderRadius: 20,
-    paddingHorizontal: 15,
-    marginRight: 10,
+    borderWidth: 1,
   },
-  button: {
+  sendButton: {
     backgroundColor: '#00008B',
-    borderRadius: 20,
-    paddingVertical: 10,
-    paddingHorizontal: 15,
+    padding: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 10,
   },
-  buttonText: { color: '#fff', fontWeight: 'bold' },
+  sendText: { color: '#fff', fontWeight: 'bold' },
+  message: {
+    backgroundColor: '#fff',
+    padding: 10,
+    borderRadius: 8,
+    marginVertical: 5,
+  },
+  unread: {
+    borderLeftWidth: 5,
+    borderLeftColor: '#FF0000',
+  },
+  sender: {
+    fontWeight: 'bold',
+    marginBottom: 2,
+  },
 });
