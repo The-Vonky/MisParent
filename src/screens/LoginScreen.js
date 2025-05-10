@@ -25,7 +25,7 @@ export default function LoginScreen() {
       setLoadingLogin(true);
       setError('');
       await signInWithEmailAndPassword(auth, email, password);
-      // Não faz navegação aqui! StackNavigator cuida disso
+      // Navegação agora é feita por AuthLoadingScreen
     } catch (err) {
       setError('Email ou senha inválidos');
       setLoadingLogin(false);
