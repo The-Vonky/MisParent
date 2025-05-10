@@ -17,13 +17,11 @@ export default function StackNavigator() {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Stack.Navigator initialRouteName="AuthLoading">
-        
         <Stack.Screen
           name="AuthLoading"
           component={AuthLoadingScreen}
           options={{ headerShown: false }}
         />
-
         <Stack.Screen
           name="Login"
           component={LoginScreen}
