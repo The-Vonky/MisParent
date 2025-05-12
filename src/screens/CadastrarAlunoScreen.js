@@ -1,97 +1,89 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import { collection, addDoc } from 'firebase/firestore';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView } from 'react-native';
 import { db } from '../config/firebaseConfig';
+import { collection, addDoc } from 'firebase/firestore';
 
-export default function CadastrarAlunoScreen() {
+export default function CadastrarAlunoScreen({ navigation }) {
   const [nome, setNome] = useState('');
   const [turma, setTurma] = useState('');
-  const [idade, setIdade] = useState('');
+  const [modalidade, setModalidade] = useState('');
+  const [professora, setProfessora] = useState('');
+  const [fotoUrl, setFotoUrl] = useState('');
 
   const handleCadastrar = async () => {
-    if (!nome || !turma || !idade) {
-      Alert.alert('Preencha todos os campos');
+    if (!nome || !turma || !modalidade || !professora) {
+      Alert.alert('Preencha todos os campos obrigatórios.');
       return;
     }
 
     try {
-      await addDoc(collection(db, 'Alunos'), {
+      await addDoc(collection(db, 'Students'), {
         nome,
         turma,
-        idade: parseInt(idade),
-        criadoEm: new Date()
+        modalidade,
+        professora,
+        fotoUrl: fotoUrl || null,
+        criadoEm: new Date(),
       });
+
       Alert.alert('Aluno cadastrado com sucesso!');
       setNome('');
       setTurma('');
-      setIdade('');
-    } catch (err) {
-      Alert.alert('Erro ao cadastrar aluno');
-      console.log(err);
+      setModalidade('');
+      setProfessora('');
+      setFotoUrl('');
+      navigation.goBack();
+    } catch (error) {
+      Alert.alert('Erro ao cadastrar aluno', error.message);
     }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.label}>Nome do Aluno</Text>
-      <TextInput
-        style={styles.input}
-        value={nome}
-        onChangeText={setNome}
-        placeholder="Digite o nome"
-      />
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.title}>Cadastrar Aluno</Text>
 
-      <Text style={styles.label}>Turma</Text>
-      <TextInput
-        style={styles.input}
-        value={turma}
-        onChangeText={setTurma}
-        placeholder="Ex: Maternal I"
-      />
-
-      <Text style={styles.label}>Idade</Text>
-      <TextInput
-        style={styles.input}
-        value={idade}
-        onChangeText={setIdade}
-        keyboardType="numeric"
-        placeholder="Ex: 4"
-      />
+      <TextInput placeholder="Nome completo" style={styles.input} value={nome} onChangeText={setNome} />
+      <TextInput placeholder="Turma" style={styles.input} value={turma} onChangeText={setTurma} />
+      <TextInput placeholder="Modalidade (Integral/Parcial)" style={styles.input} value={modalidade} onChangeText={setModalidade} />
+      <TextInput placeholder="Professora responsável" style={styles.input} value={professora} onChangeText={setProfessora} />
+      <TextInput placeholder="URL da Foto (opcional)" style={styles.input} value={fotoUrl} onChangeText={setFotoUrl} />
 
       <TouchableOpacity style={styles.button} onPress={handleCadastrar}>
-        <Text style={styles.buttonText}>Cadastrar Aluno</Text>
+        <Text style={styles.buttonText}>Salvar</Text>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     padding: 20,
-    flex: 1,
     backgroundColor: '#fff',
+    flexGrow: 1,
+    justifyContent: 'center',
   },
-  label: {
+  title: {
+    fontSize: 24,
     fontWeight: 'bold',
-    marginTop: 10,
+    marginBottom: 24,
+    textAlign: 'center',
   },
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    padding: 12,
+    marginBottom: 16,
     borderRadius: 8,
-    marginTop: 5,
   },
   button: {
-    backgroundColor: '#00008B',
-    marginTop: 20,
-    paddingVertical: 15,
-    borderRadius: 10,
-    alignItems: 'center'
+    backgroundColor: '#1e3a8a',
+    padding: 16,
+    borderRadius: 8,
+    marginTop: 8,
   },
   buttonText: {
     color: '#fff',
+    textAlign: 'center',
     fontWeight: 'bold',
   },
 });
