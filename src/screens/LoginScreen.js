@@ -9,13 +9,11 @@ import {
   ImageBackground,
   ActivityIndicator,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context'; // <-- IMPORTANTE
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth, firestore } from '../config/firebaseConfig';
-import { getDoc, doc } from 'firebase/firestore';
+import { auth } from '../config/firebaseConfig';
 import Icon from 'react-native-vector-icons/Feather';
 
-export default function LoginScreen({ navigation }) {
+export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [hidePassword, setHidePassword] = useState(true);
@@ -26,24 +24,8 @@ export default function LoginScreen({ navigation }) {
     try {
       setLoadingLogin(true);
       setError('');
-
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-
-      const userDoc = await getDoc(doc(firestore, 'Users', user.uid));
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        const role = userData.role;
-
-        if (role === 'admin') {
-          navigation.replace('Admin');
-        } else {
-          navigation.replace('Home');
-        }
-      } else {
-        setError('Usuário não encontrado no banco de dados!');
-        setLoadingLogin(false);
-      }
+      await signInWithEmailAndPassword(auth, email, password);
+      // Navegação agora é feita por AuthLoadingScreen
     } catch (err) {
       setError('Email ou senha inválidos');
       setLoadingLogin(false);
@@ -51,66 +33,64 @@ export default function LoginScreen({ navigation }) {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
-      <ImageBackground
-        source={require('../../assets/Background-Login.png')}
-        style={styles.background}
-        resizeMode="cover"
-      >
-        <View style={styles.overlay}>
-          <Image
-            source={require('../../assets/Logo.png')}
-            style={styles.logo}
-          />
+    <ImageBackground
+      source={require('../../assets/Background-Login.png')}
+      style={styles.background}
+      resizeMode="cover"
+    >
+      <View style={styles.overlay}>
+        <Image
+          source={require('../../assets/Logo.png')}
+          style={styles.logo}
+        />
 
+        <TextInput
+          style={styles.input}
+          placeholder="E-mail"
+          placeholderTextColor="#999"
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+          keyboardType="email-address"
+        />
+
+        <View style={styles.passwordContainer}>
           <TextInput
-            style={styles.input}
-            placeholder="E-mail"
+            style={styles.inputPassword}
+            placeholder="Senha"
             placeholderTextColor="#999"
-            value={email}
-            onChangeText={setEmail}
-            autoCapitalize="none"
-            keyboardType="email-address"
+            secureTextEntry={hidePassword}
+            value={password}
+            onChangeText={setPassword}
           />
-
-          <View style={styles.passwordContainer}>
-            <TextInput
-              style={styles.inputPassword}
-              placeholder="Senha"
-              placeholderTextColor="#999"
-              secureTextEntry={hidePassword}
-              value={password}
-              onChangeText={setPassword}
+          <TouchableOpacity onPress={() => setHidePassword(!hidePassword)}>
+            <Icon
+              name={hidePassword ? 'eye-off' : 'eye'}
+              size={20}
+              color="#999"
             />
-            <TouchableOpacity onPress={() => setHidePassword(!hidePassword)}>
-              <Icon
-                name={hidePassword ? 'eye-off' : 'eye'}
-                size={20}
-                color="#999"
-              />
-            </TouchableOpacity>
-          </View>
-
-          {error ? <Text style={styles.error}>{error}</Text> : null}
-
-          <TouchableOpacity
-            style={[styles.button, loadingLogin && { backgroundColor: '#555' }]}
-            onPress={handleLogin}
-            disabled={loadingLogin}
-          >
-            {loadingLogin ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.buttonText}>Entrar</Text>
-            )}
-          </TouchableOpacity>
-
-          <TouchableOpacity>
-            <Text style={styles.forgotPassword}>Esqueceu a senha?</Text>
           </TouchableOpacity>
         </View>
-      </ImageBackground>
-    </SafeAreaView>
+
+        {error ? <Text style={styles.error}>{error}</Text> : null}
+
+        <TouchableOpacity
+          style={[styles.button, loadingLogin && { backgroundColor: '#555' }]}
+          onPress={handleLogin}
+          disabled={loadingLogin}
+        >
+          {loadingLogin ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Entrar</Text>
+          )}
+        </TouchableOpacity>
+
+        <TouchableOpacity>
+          <Text style={styles.forgotPassword}>Esqueceu a senha?</Text>
+        </TouchableOpacity>
+      </View>
+    </ImageBackground>
   );
 }
 
