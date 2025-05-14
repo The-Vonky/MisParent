@@ -7,6 +7,8 @@ import { doc, getDoc } from 'firebase/firestore';
 
 import { auth, firestore } from './src/config/firebaseConfig';
 import StackNavigator from './src/navigation/StackNavigator';
+import AdminScreen from './src/screens/AdminScreen';
+import HomeScreen from './src/screens/HomeScreen';
 
 export default function App() {
   const [loading, setLoading] = useState(true);
