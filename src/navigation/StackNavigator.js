@@ -1,6 +1,7 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { SafeAreaView } from 'react-native';  // Importar SafeAreaView
+import { SafeAreaView } from 'react-native';
+import AuthLoadingScreen from '../screens/AuthLoadingScreen';
 import LoginScreen from '../screens/LoginScreen';
 import HomeScreen from '../screens/HomeScreen';
 import AdminScreen from '../screens/AdminScreen';
@@ -14,19 +15,26 @@ const Stack = createNativeStackNavigator();
 export default function StackNavigator() {
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <Stack.Navigator initialRouteName="Login">
+      <Stack.Navigator initialRouteName="AuthLoading">
+        
+        <Stack.Screen
+          name="AuthLoading"
+          component={AuthLoadingScreen}
+          options={{ headerShown: false }}
+        />
+
         <Stack.Screen
           name="Login"
           component={LoginScreen}
           options={{ headerShown: false }}
         />
         <Stack.Screen
-          name="Home"
+          name="HomePai"
           component={HomeScreen}
           options={{ headerShown: false }}
         />
         <Stack.Screen
-          name="Admin"
+          name="HomeAdm"
           component={AdminScreen}
           options={{ headerShown: false }}
         />
@@ -54,7 +62,6 @@ export default function StackNavigator() {
           component={SettingsScreen}
           options={{ headerShown: false }}
         />
-
       </Stack.Navigator>
     </SafeAreaView>
   );
