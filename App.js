@@ -7,8 +7,6 @@ import { doc, getDoc } from 'firebase/firestore';
 
 import { auth, firestore } from './src/config/firebaseConfig';
 import StackNavigator from './src/navigation/StackNavigator';
-import AdminScreen from './src/screens/AdminScreen';
-import HomeScreen from './src/screens/HomeScreen';
 
 export default function App() {
   const [loading, setLoading] = useState(true);
@@ -22,12 +20,11 @@ export default function App() {
           if (userDoc.exists()) {
             const userData = userDoc.data();
             if (userData.role === 'admin') {
-              setInitialScreen('Admin');
+              setInitialScreen('HomeAdm'); // Corrigido
             } else {
-              setInitialScreen('Home');
+              setInitialScreen('HomePai'); // Corrigido
             }
           } else {
-            // Se não tiver role, volta pro login
             setInitialScreen('Login');
           }
         } catch (error) {

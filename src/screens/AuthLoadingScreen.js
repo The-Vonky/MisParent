@@ -13,10 +13,10 @@ import MessagesScreen from '../screens/MessagesScreen';
 
 const Stack = createNativeStackNavigator();
 
-export default function StackNavigator() {
+export default function StackNavigator({ initialScreen }) {
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <Stack.Navigator initialRouteName="AuthLoading">
+      <Stack.Navigator initialRouteName={initialScreen}>
         <Stack.Screen
           name="AuthLoading"
           component={AuthLoadingScreen}
@@ -25,7 +25,7 @@ export default function StackNavigator() {
         <Stack.Screen
           name="Login"
           component={LoginScreen}
-          options={{ headerShown: true }}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="HomePai"
