@@ -1,4 +1,3 @@
-import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { signOut } from 'firebase/auth';
 import { auth } from '../config/firebaseConfig';

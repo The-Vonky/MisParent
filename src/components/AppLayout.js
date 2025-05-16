@@ -1,4 +1,3 @@
-import React from 'react';
 import { SafeAreaView, StyleSheet } from 'react-native';
 
 export default function AppLayout({ children }) {
@@ -12,6 +11,6 @@ export default function AppLayout({ children }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1e3a8a', // <<< Cor padrão do app inteiro
+    backgroundColor: '#1e3a8a',
   },
 });

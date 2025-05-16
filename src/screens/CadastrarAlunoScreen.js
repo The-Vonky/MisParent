@@ -1,89 +1,132 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView } from 'react-native';
-import { db } from '../config/firebaseConfig';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  SafeAreaView,
+  ScrollView,
+} from 'react-native';
 import { collection, addDoc } from 'firebase/firestore';
+import { db } from '../config/firebaseConfig';
 
-export default function CadastrarAlunoScreen({ navigation }) {
+export default function CadastrarAlunoScreen() {
   const [nome, setNome] = useState('');
   const [turma, setTurma] = useState('');
-  const [modalidade, setModalidade] = useState('');
-  const [professora, setProfessora] = useState('');
-  const [fotoUrl, setFotoUrl] = useState('');
+  const [idade, setIdade] = useState('');
 
   const handleCadastrar = async () => {
-    if (!nome || !turma || !modalidade || !professora) {
-      Alert.alert('Preencha todos os campos obrigatórios.');
+    if (!nome || !turma || !idade) {
+      Alert.alert('Erro', 'Preencha todos os campos.');
       return;
     }
 
     try {
-      await addDoc(collection(db, 'Students'), {
+      await addDoc(collection(db, 'Alunos'), {
         nome,
         turma,
-        modalidade,
-        professora,
-        fotoUrl: fotoUrl || null,
+        idade: parseInt(idade),
         criadoEm: new Date(),
       });
-
-      Alert.alert('Aluno cadastrado com sucesso!');
+      Alert.alert('Sucesso', 'Aluno cadastrado com sucesso!');
       setNome('');
       setTurma('');
-      setModalidade('');
-      setProfessora('');
-      setFotoUrl('');
-      navigation.goBack();
-    } catch (error) {
-      Alert.alert('Erro ao cadastrar aluno', error.message);
+      setIdade('');
+    } catch (err) {
+      Alert.alert('Erro', 'Erro ao cadastrar aluno.');
+      console.log(err);
     }
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Cadastrar Aluno</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#f8fafc' }}>
+      <View style={styles.header}>
+        <Text style={styles.headerText}>Cadastro de Aluno</Text>
+      </View>
+      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+        <Text style={styles.label}>Nome do Aluno</Text>
+        <TextInput
+          style={styles.input}
+          value={nome}
+          onChangeText={setNome}
+          placeholder="Digite o nome"
+        />
 
-      <TextInput placeholder="Nome completo" style={styles.input} value={nome} onChangeText={setNome} />
-      <TextInput placeholder="Turma" style={styles.input} value={turma} onChangeText={setTurma} />
-      <TextInput placeholder="Modalidade (Integral/Parcial)" style={styles.input} value={modalidade} onChangeText={setModalidade} />
-      <TextInput placeholder="Professora responsável" style={styles.input} value={professora} onChangeText={setProfessora} />
-      <TextInput placeholder="URL da Foto (opcional)" style={styles.input} value={fotoUrl} onChangeText={setFotoUrl} />
+        <Text style={styles.label}>Turma</Text>
+        <TextInput
+          style={styles.input}
+          value={turma}
+          onChangeText={setTurma}
+          placeholder="Ex: Maternal I"
+        />
 
-      <TouchableOpacity style={styles.button} onPress={handleCadastrar}>
-        <Text style={styles.buttonText}>Salvar</Text>
-      </TouchableOpacity>
-    </ScrollView>
+        <Text style={styles.label}>Idade</Text>
+        <TextInput
+          style={styles.input}
+          value={idade}
+          onChangeText={setIdade}
+          keyboardType="numeric"
+          placeholder="Ex: 4"
+        />
+
+        <TouchableOpacity style={styles.button} onPress={handleCadastrar} activeOpacity={0.8}>
+          <Text style={styles.buttonText}>Cadastrar Aluno</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  header: {
+    paddingTop: 60,
+    paddingBottom: 24,
+    backgroundColor: '#1e3a8a',
+    alignItems: 'center',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    elevation: 4,
+  },
+  headerText: {
+    color: '#fff',
+    fontSize: 22,
+    fontWeight: '700',
+  },
   container: {
     padding: 20,
-    backgroundColor: '#fff',
-    flexGrow: 1,
-    justifyContent: 'center',
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 24,
-    textAlign: 'center',
+  label: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1e3a8a',
+    marginBottom: 6,
+    marginTop: 20,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: '#cbd5e1',
     padding: 12,
-    marginBottom: 16,
-    borderRadius: 8,
+    borderRadius: 10,
+    backgroundColor: '#fff',
+    fontSize: 16,
   },
   button: {
     backgroundColor: '#1e3a8a',
-    padding: 16,
-    borderRadius: 8,
-    marginTop: 8,
+    paddingVertical: 16,
+    borderRadius: 10,
+    marginTop: 30,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 4,
   },
   buttonText: {
     color: '#fff',
     textAlign: 'center',
-    fontWeight: 'bold',
+    fontWeight: '600',
+    fontSize: 16,
   },
 });

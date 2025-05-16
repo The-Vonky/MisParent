@@ -20,22 +20,20 @@ const ScheduleList = ({ date }) => {
 
   const handlePress = (id) => {
     if (expandedItem === id) {
-      // Fechar o item com animação mais lenta
       Animated.parallel([
         Animated.timing(heights[id], {
-          toValue: 0, // Contraindo a altura
-          duration: 500, // Tempo mais longo para fechamento
+          toValue: 0,
+          duration: 500,
           useNativeDriver: false,
         }),
         Animated.timing(opacity[id], {
-          toValue: 0, // Diminuindo a opacidade
-          duration: 300, // Tempo mais longo para fechamento
+          toValue: 0,
+          duration: 300,
           useNativeDriver: false,
         }),
       ]).start();
       setExpandedItem(null);
     } else {
-      // Fechar o item anteriormente aberto, caso haja
       if (expandedItem) {
         Animated.parallel([
           Animated.timing(heights[expandedItem], {
@@ -51,17 +49,16 @@ const ScheduleList = ({ date }) => {
         ]).start();
       }
 
-      // Expandir o item clicado
       setExpandedItem(id);
       Animated.parallel([
         Animated.timing(heights[id], {
-          toValue: 100, // Expansão da altura
-          duration: 300, // Tempo mais rápido para expansão
+          toValue: 100,
+          duration: 300,
           useNativeDriver: false,
         }),
         Animated.timing(opacity[id], {
-          toValue: 1, // Aumentando a opacidade
-          duration: 300, // Tempo mais rápido para expansão
+          toValue: 1,
+          duration: 300,
           useNativeDriver: false,
         }),
       ]).start();
@@ -71,12 +68,11 @@ const ScheduleList = ({ date }) => {
   const renderItem = ({ item }) => {
     const isExpanded = expandedItem === item.id;
 
-    // Inicializa a animação de altura e opacidade para cada item, se não estiver já configurado
     if (!heights[item.id]) {
-      heights[item.id] = new Animated.Value(0); // altura inicial 0
+      heights[item.id] = new Animated.Value(0);
     }
     if (!opacity[item.id]) {
-      opacity[item.id] = new Animated.Value(0); // opacidade inicial 0
+      opacity[item.id] = new Animated.Value(0);
     }
 
     return (
@@ -134,10 +130,10 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   heading: {
-    fontSize: 18,  // Ajustando o tamanho para ser mais suave
-    fontWeight: '500', // Menos peso, mais suave
-    color: '#1e3a8a', // Cor que combina com o restante do layout
-    marginBottom: 15,  // Espaço mais sutil entre o título e o conteúdo
+    fontSize: 18,
+    fontWeight: '500',
+    color: '#1e3a8a',
+    marginBottom: 15,
   },
   empty: {
     fontStyle: 'italic',
@@ -167,7 +163,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   details: {
-    overflow: 'hidden', // Para esconder o conteúdo quando contraído
+    overflow: 'hidden',
     marginTop: 8,
     borderTopWidth: 1,
     borderTopColor: '#e2e8f0',

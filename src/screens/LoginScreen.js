@@ -9,7 +9,7 @@ import {
   ImageBackground,
   ActivityIndicator,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context'; // <-- IMPORTANTE
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth, firestore } from '../config/firebaseConfig';
 import { getDoc, doc } from 'firebase/firestore';

@@ -1,4 +1,3 @@
-import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 
@@ -31,10 +30,10 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   heading: {
-    fontSize: 18,  // Menor que "Aulas do Dia"
-    fontWeight: '500', // Peso mais leve
-    color: '#1e3a8a', // Cor que combine com o calendário
-    marginBottom: 8,  // Menos espaço do que o título anterior
+    fontSize: 18,
+    fontWeight: '500',
+    color: '#1e3a8a',
+    marginBottom: 8,
   },
 });
 

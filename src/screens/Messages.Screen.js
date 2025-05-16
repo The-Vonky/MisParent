@@ -1,38 +1,53 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
-import { collection, addDoc, query, where, onSnapshot, updateDoc, doc } from 'firebase/firestore';
-import { firestore } from '../config/firebaseConfig';
+import React, { useEffect, useState, useRef } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  FlatList,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
+import {
+  collection,
+  addDoc,
+  query,
+  where,
+  onSnapshot,
+  updateDoc,
+  doc,
+} from 'firebase/firestore';
 import { useNavigation } from '@react-navigation/native';
-import { auth } from '../config/firebaseConfig';
+import { firestore, auth } from '../config/firebaseConfig';
 
 export default function MessagesScreen() {
   const navigation = useNavigation();
   const currentUser = auth.currentUser;
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState('');
-  const [recipientId, setRecipientId] = useState('admin'); // Pode mudar se o adm quiser mandar p/ alguém específico
+  const [recipientId, setRecipientId] = useState('admin');
+  const flatListRef = useRef(null);
 
   useEffect(() => {
-    const messagesRef = collection(firestore, 'messages');
-
     const q = query(
-      messagesRef,
+      collection(firestore, 'messages'),
       where('participants', 'array-contains', currentUser.uid)
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const msgs = [];
-      snapshot.forEach((doc) => {
-        msgs.push({ id: doc.id, ...doc.data() });
-      });
+      const msgs = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
       setMessages(msgs.sort((a, b) => a.timestamp - b.timestamp));
     });
 
-    return () => unsubscribe();
+    return unsubscribe;
   }, []);
 
   const sendMessage = async () => {
-    if (text.trim() === '') return;
+    if (!text.trim()) return;
 
     await addDoc(collection(firestore, 'messages'), {
       text,
@@ -47,80 +62,151 @@ export default function MessagesScreen() {
   };
 
   const markAsRead = async (messageId) => {
-    const msgRef = doc(firestore, 'messages', messageId);
-    await updateDoc(msgRef, { read: true });
+    await updateDoc(doc(firestore, 'messages', messageId), { read: true });
+  };
+
+  const renderItem = ({ item }) => {
+    const isCurrentUser = item.senderId === currentUser.uid;
+    return (
+      <View
+        style={[
+          styles.message,
+          isCurrentUser ? styles.messageRight : styles.messageLeft,
+          !item.read && !isCurrentUser && styles.unreadBorder,
+        ]}
+      >
+        <Text style={styles.sender}>
+          {isCurrentUser ? 'Você' : 'Admin'}:
+        </Text>
+        <Text>{item.text}</Text>
+      </View>
+    );
   };
 
   return (
-    <View style={styles.container}>
+    <View style={styles.wrapper}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.navigate('Admin')}>
-          <Text style={styles.backButton}>← Voltar</Text>
+          <Text style={styles.backButton}>←</Text>
         </TouchableOpacity>
-        <Text style={styles.title}>Mensagens</Text>
+        <Text style={styles.headerTitle}>Mensagens</Text>
       </View>
 
       <FlatList
         data={messages}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={[styles.message, item.read ? null : styles.unread]}
-            onPress={() => markAsRead(item.id)}
-          >
-            <Text style={styles.sender}>{item.senderId === currentUser.uid ? 'Você' : 'Outro'}:</Text>
-            <Text>{item.text}</Text>
-          </TouchableOpacity>
-        )}
+        ref={flatListRef}
+        onContentSizeChange={() => flatListRef.current.scrollToEnd({ animated: true })}
         keyExtractor={(item) => item.id}
+        renderItem={renderItem}
+        contentContainerStyle={styles.chatContainer}
       />
 
-      <TextInput
-        placeholder="Digite sua mensagem"
-        value={text}
-        onChangeText={setText}
-        style={styles.input}
-      />
-
-      <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
-        <Text style={styles.sendText}>Enviar</Text>
-      </TouchableOpacity>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={100}
+      >
+        <View style={styles.inputContainer}>
+          <TextInput
+            placeholder="Digite sua mensagem..."
+            value={text}
+            onChangeText={setText}
+            style={styles.input}
+            multiline
+          />
+          <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
+            <Text style={styles.sendText}>Enviar</Text>
+          </TouchableOpacity>
+        </View>
+      </KeyboardAvoidingView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: '#f0f0f0' },
-  header: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
-  backButton: { fontSize: 18, color: 'blue', marginRight: 10 },
-  title: { fontSize: 20, fontWeight: 'bold' },
-  input: {
-    backgroundColor: '#fff',
-    padding: 10,
-    borderRadius: 8,
-    marginTop: 10,
-    borderColor: '#ccc',
-    borderWidth: 1,
+  wrapper: {
+    flex: 1,
+    backgroundColor: '#f4f6fa',
   },
-  sendButton: {
-    backgroundColor: '#00008B',
-    padding: 10,
-    borderRadius: 8,
+  header: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 10,
+    paddingTop: 50,
+    paddingBottom: 20,
+    backgroundColor: '#1e3a8a',
+    paddingHorizontal: 20,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
   },
-  sendText: { color: '#fff', fontWeight: 'bold' },
+  backButton: {
+    color: '#fff',
+    fontSize: 24,
+    marginRight: 10,
+  },
+  headerTitle: {
+    fontSize: 20,
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  chatContainer: {
+    paddingHorizontal: 20,
+    paddingBottom: 10,
+  },
   message: {
+    maxWidth: '80%',
+    marginVertical: 6,
+    padding: 12,
+    borderRadius: 12,
     backgroundColor: '#fff',
-    padding: 10,
-    borderRadius: 8,
-    marginVertical: 5,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
-  unread: {
-    borderLeftWidth: 5,
-    borderLeftColor: '#FF0000',
+  messageLeft: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#e5e7eb',
+  },
+  messageRight: {
+    alignSelf: 'flex-end',
+    backgroundColor: '#dbeafe',
+  },
+  unreadBorder: {
+    borderLeftWidth: 4,
+    borderLeftColor: '#ef4444',
   },
   sender: {
     fontWeight: 'bold',
-    marginBottom: 2,
+    marginBottom: 4,
+    fontSize: 14,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    padding: 16,
+    borderTopWidth: 1,
+    borderColor: '#e5e7eb',
+    backgroundColor: '#fff',
+    alignItems: 'flex-end',
+  },
+  input: {
+    flex: 1,
+    maxHeight: 100,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 12,
+    padding: 12,
+    fontSize: 16,
+    backgroundColor: '#f9fafb',
+  },
+  sendButton: {
+    backgroundColor: '#1e3a8a',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    marginLeft: 10,
+    justifyContent: 'center',
+  },
+  sendText: {
+    color: '#fff',
+    fontWeight: 'bold',
   },
 });

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { StyleSheet, FlatList, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Header from '../components/Header';
@@ -9,8 +9,7 @@ import Divider from '../components/Divider';
 import ProfileMenu from '../components/ProfileMenu';
 import MessagesModal from '../components/MessagesModal';
 import NotificationModal from '../components/NotificationModal';
-import DailyReport from '../components/DailyReport'; // Importando o componente DailyReport
-import { Text } from 'react-native';
+
 
 const HomeScreen = () => {
   const [selectedDate, setSelectedDate] = useState('2025-02-28');
@@ -18,14 +17,14 @@ const HomeScreen = () => {
   const [menuVisible, setMenuVisible] = useState(false);
   const [notificationsVisible, setNotificationsVisible] = useState(false);
   const [messagesVisible, setMessagesVisible] = useState(false);
-  const [dailyReport, setDailyReport] = useState(null); // Para armazenar os dados do resumo do dia
+  const [dailyReport, setDailyReport] = useState(null);
 
   const handleProfilePress = () => setMenuVisible(true);
   const handleNotificationPress = () => setNotificationsVisible(true);
   const handleMessagePress = () => setMessagesVisible(true);
 
   const handleSaveReport = (report) => {
-    setDailyReport(report); // Aqui você pode salvar no Firebase ou em outro local
+    setDailyReport(report);
   };
 
   return (
@@ -55,10 +54,6 @@ const HomeScreen = () => {
             <Announcement />
             <Divider />
 
-            {/* Agora direto o DailyReport */}
-            <DailyReport selectedDate={selectedDate} />
-
-            <Divider />
           </View>
         }
         keyExtractor={(item, index) => index.toString()}

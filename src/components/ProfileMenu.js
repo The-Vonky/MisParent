@@ -15,27 +15,24 @@ const screenWidth = Dimensions.get('window').width;
 
 const ProfileMenu = ({ visible, onClose }) => {
   const translateX = useRef(new Animated.Value(-screenWidth)).current;
-  const [isVisible, setIsVisible] = useState(visible); // Controla a visibilidade da sidebar
-  const [closing, setClosing] = useState(false); // Controle do fechamento da sidebar
+  const [isVisible, setIsVisible] = useState(visible);
+  const [closing, setClosing] = useState(false);
 
   useEffect(() => {
     if (visible) {
-      setIsVisible(true); // Torna a sidebar visível
-      // Animação de entrada suave
+      setIsVisible(true);
       Animated.timing(translateX, {
         toValue: 0,
         duration: 400,
         useNativeDriver: true,
       }).start();
     } else {
-      setClosing(true); // Indica que está fechando
-      // Animação de saída suave
+      setClosing(true);
       Animated.timing(translateX, {
         toValue: -screenWidth,
         duration: 600,
         useNativeDriver: true,
       }).start(() => {
-        // Após a animação, chama o onClose e desabilita a visibilidade
         setIsVisible(false);
         onClose();
         setClosing(false);
@@ -123,6 +120,7 @@ const ProfileMenu = ({ visible, onClose }) => {
           <Text style={[styles.text, { color: '#ef4444' }]}>Sair</Text>
           <Ionicons name="chevron-forward" size={20} color="#ef4444" style={styles.arrow} />
         </TouchableOpacity>
+
       </Animated.View>
     </View>
   );
@@ -147,7 +145,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 2, height: 0 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
-    zIndex: 9999, // Garante que a sidebar sobreponha tudo até sair
+    zIndex: 9999,
   },
 
   title: {
