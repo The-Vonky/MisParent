@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -7,16 +7,20 @@ import {
   Animated,
   Dimensions,
   Pressable,
+  Alert,
 } from 'react-native';
+import { signOut } from 'firebase/auth';
+import { auth } from '../config/firebaseConfig';
 import { BlurView } from 'expo-blur';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { Image } from 'react-native';
+
 
 const screenWidth = Dimensions.get('window').width;
 
-const ProfileMenu = ({ visible, onClose }) => {
+const ProfileMenu = ({ visible, onClose, user }) => {
   const translateX = useRef(new Animated.Value(-screenWidth)).current;
   const [isVisible, setIsVisible] = useState(visible);
-  const [closing, setClosing] = useState(false);
 
   useEffect(() => {
     if (visible) {
@@ -27,100 +31,75 @@ const ProfileMenu = ({ visible, onClose }) => {
         useNativeDriver: true,
       }).start();
     } else {
-      setClosing(true);
       Animated.timing(translateX, {
         toValue: -screenWidth,
-        duration: 600,
+        duration: 450,
         useNativeDriver: true,
       }).start(() => {
         setIsVisible(false);
         onClose();
-        setClosing(false);
       });
     }
   }, [visible]);
 
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      Alert.alert('Erro', 'Não foi possível sair da conta.');
+    }
+  };
+
+  if (!isVisible) return null;
+
+  const MenuItem = ({ icon, label, color = '#1e3a8a', onPress }) => (
+    <TouchableOpacity style={styles.item} onPress={onPress}>
+      <Ionicons name={icon} size={20} color={color} style={styles.icon} />
+      <Text style={[styles.text, { color }]}>{label}</Text>
+      <Ionicons name="chevron-forward" size={20} color={color} style={styles.arrow} />
+    </TouchableOpacity>
+  );
+
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents={visible ? 'auto' : 'none'}>
-      {visible && (
-        <Pressable style={styles.backdrop} onPress={onClose}>
-          <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
-        </Pressable>
-      )}
+      <Pressable style={styles.backdrop} onPress={onClose}>
+        <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
+      </Pressable>
 
-      <Animated.View
-        style={[
-          styles.menu,
-          { transform: [{ translateX }] },
-          { zIndex: 9999 },
-        ]}
-      >
-        <Text style={styles.title}>Menu</Text>
+      <Animated.View style={[styles.menu, { transform: [{ translateX }] }]}>
+
+        <View style={styles.header}>
+          <Image
+            source={{ uri: 'https://i.pravatar.cc/300' }} // essa URL gera um rosto aleatório
+            style={styles.avatar}
+          />
+
+          <View style={styles.infoContainer}>
+            <Text style={styles.username}>{user?.name || 'Nome do Usuário'}</Text>
+            <Text style={styles.role}>{user?.role || 'Tipo do Usuário'}</Text>
+          </View>
+        </View>
+
+        <View style={styles.divider} />
+        <MenuItem icon="person" label="Gerenciar Usuário" />
+        <View style={styles.divider} />
+        <MenuItem icon="calendar" label="Grade de Horários" />
+        <View style={styles.divider} />
+        <MenuItem icon="list" label="Atividades e Tarefas" />
+        <View style={styles.divider} />
+        <MenuItem icon="checkbox" label="Frequência" />
+        <View style={styles.divider} />
+        <MenuItem icon="school" label="Materiais do Aluno" />
+        <View style={styles.divider} />
+        <MenuItem icon="book" label="Plano de Aula" />
+        <View style={styles.divider} />
+        <MenuItem icon="business" label="Secretaria" />
+        <View style={styles.divider} />
+        <MenuItem icon="settings" label="Configurações" />
 
         <View style={styles.divider} />
 
-        <TouchableOpacity style={styles.item}>
-          <Ionicons name="person" size={20} color="#1e3a8a" style={styles.icon} />
-          <Text style={styles.text}>Gerenciar Usuário</Text>
-          <Ionicons name="chevron-forward" size={20} color="#1e3a8a" style={styles.arrow} />
-        </TouchableOpacity>
-
-        <View style={styles.divider} />
-
-        <TouchableOpacity style={styles.item}>
-          <Ionicons name="calendar" size={20} color="#1e3a8a" style={styles.icon} />
-          <Text style={styles.text}>Grade de Horários</Text>
-          <Ionicons name="chevron-forward" size={20} color="#1e3a8a" style={styles.arrow} />
-        </TouchableOpacity>
-
-        <View style={styles.divider} />
-
-        <TouchableOpacity style={styles.item}>
-          <Ionicons name="list" size={20} color="#1e3a8a" style={styles.icon} />
-          <Text style={styles.text}>Atividades e Tarefas</Text>
-          <Ionicons name="chevron-forward" size={20} color="#1e3a8a" style={styles.arrow} />
-        </TouchableOpacity>
-
-        <View style={styles.divider} />
-
-        <TouchableOpacity style={styles.item}>
-          <Ionicons name="checkbox" size={20} color="#1e3a8a" style={styles.icon} />
-          <Text style={styles.text}>Frequência</Text>
-          <Ionicons name="chevron-forward" size={20} color="#1e3a8a" style={styles.arrow} />
-        </TouchableOpacity>
-
-        <View style={styles.divider} />
-
-        <TouchableOpacity style={styles.item}>
-          <Ionicons name="school" size={20} color="#1e3a8a" style={styles.icon} />
-          <Text style={styles.text}>Materiais do Aluno</Text>
-          <Ionicons name="chevron-forward" size={20} color="#1e3a8a" style={styles.arrow} />
-        </TouchableOpacity>
-
-        <View style={styles.divider} />
-
-        <TouchableOpacity style={styles.item}>
-          <Ionicons name="book" size={20} color="#1e3a8a" style={styles.icon} />
-          <Text style={styles.text}>Plano de Aula</Text>
-          <Ionicons name="chevron-forward" size={20} color="#1e3a8a" style={styles.arrow} />
-        </TouchableOpacity>
-
-        <View style={styles.divider} />
-
-        <TouchableOpacity style={styles.item}>
-          <Ionicons name="business" size={20} color="#1e3a8a" style={styles.icon} />
-          <Text style={styles.text}>Secretaria</Text>
-          <Ionicons name="chevron-forward" size={20} color="#1e3a8a" style={styles.arrow} />
-        </TouchableOpacity>
-
-        <View style={styles.divider} />
-
-        <TouchableOpacity style={styles.item}>
-          <Ionicons name="log-out" size={20} color="#ef4444" style={styles.icon} />
-          <Text style={[styles.text, { color: '#ef4444' }]}>Sair</Text>
-          <Ionicons name="chevron-forward" size={20} color="#ef4444" style={styles.arrow} />
-        </TouchableOpacity>
-
+        <MenuItem icon="log-out" label="Sair" color="#ef4444" onPress={handleLogout} />
       </Animated.View>
     </View>
   );
@@ -131,28 +110,47 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     zIndex: 1,
   },
-
   menu: {
     position: 'absolute',
-    top: 34,
+    top: 0,
     left: 0,
     height: '100%',
     width: screenWidth * 0.75,
     backgroundColor: '#fff',
-    padding: 15,
-    elevation: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 2, height: 0 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
+    padding: 20,
     zIndex: 9999,
+    shadowColor: '#000',
+    shadowOffset: { width: 4, height: 0 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 10,
+    borderTopRightRadius: 15,
+    borderBottomRightRadius: 15,
   },
-
-  title: {
-    fontSize: 25,
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  avatar: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#d1d5db',
+    marginRight: 15,
+  },
+  infoContainer: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  username: {
+    fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 5,
     color: '#1e3a8a',
+  },
+  role: {
+    fontSize: 12,
+    color: '#6b7280',
   },
 
   item: {
@@ -160,21 +158,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
   },
-
-  text: {
-    fontSize: 16,
-    color: '#1e3a8a',
-    flex: 1,
-  },
-
   icon: {
     marginRight: 12,
   },
-
-  arrow: {
-    marginLeft: 10, 
+  text: {
+    fontSize: 16,
+    flex: 1,
   },
-
+  arrow: {
+    marginLeft: 10,
+  },
   divider: {
     height: 1,
     backgroundColor: '#e5e7eb',

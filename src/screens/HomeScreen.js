@@ -17,15 +17,10 @@ const HomeScreen = () => {
   const [menuVisible, setMenuVisible] = useState(false);
   const [notificationsVisible, setNotificationsVisible] = useState(false);
   const [messagesVisible, setMessagesVisible] = useState(false);
-  const [dailyReport, setDailyReport] = useState(null);
 
   const handleProfilePress = () => setMenuVisible(true);
   const handleNotificationPress = () => setNotificationsVisible(true);
   const handleMessagePress = () => setMessagesVisible(true);
-
-  const handleSaveReport = (report) => {
-    setDailyReport(report);
-  };
 
   return (
     <SafeAreaView style={styles.container}>
