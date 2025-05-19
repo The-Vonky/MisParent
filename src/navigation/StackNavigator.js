@@ -8,6 +8,7 @@ import MessagesScreen from '../screens/Messages.Screen';
 import CadastrarAlunoScreen from '../screens/CadastrarAlunoScreen';
 import SettingsScreen from '../screens/SettingsScreens';
 import RelatorioDiarioScreen from '../screens/RelatorioDiario';
+import PerfilAlunoScreen from '../screens/PerfilAlunoScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -61,6 +62,12 @@ export default function StackNavigator() {
           name="Settings"
           component={SettingsScreen}
           options={{ headerShown: false }}
+        />
+
+        <Stack.Screen
+          name="PerfilAluno"
+          component={PerfilAlunoScreen}
+          options={{headerShown: false}}
         />
 
       </Stack.Navigator>

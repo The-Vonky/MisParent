@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
-import { Bell, MessageSquare } from 'lucide-react-native';
+import { Bell, BetweenHorizonalEnd, MessageSquare } from 'lucide-react-native';
 import NotificationModal from '../components/NotificationModal';
 import MessageModal from '../components/MessagesModal';
 
-const Header = ({ userName = 'Mordecai', onProfilePress }) => {
+const Header = ({ userName = 'Gandalf', onProfilePress }) => {
   const [isNotificationVisible, setNotificationVisible] = useState(false);
   const [isMessageVisible, setMessageVisible] = useState(false);
 
@@ -29,7 +29,7 @@ const Header = ({ userName = 'Mordecai', onProfilePress }) => {
       <View style={styles.left}>
         <TouchableOpacity onPress={onProfilePress}>
           <Image
-            source={require('../../assets/mordecai.png')}
+            source={{ uri: 'https://static1.srcdn.com/wordpress/wp-content/uploads/2017/07/Sir-Ian-McKellen-as-Gandalf-The-Grey-The-Shire-Lord-of-the-Rings-Peter-Jackson.jpg' }}
             style={styles.profile}
           />
         </TouchableOpacity>

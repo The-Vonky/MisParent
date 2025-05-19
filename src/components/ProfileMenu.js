@@ -8,19 +8,22 @@ import {
   Dimensions,
   Pressable,
   Alert,
+  Modal,
 } from 'react-native';
 import { signOut } from 'firebase/auth';
 import { auth } from '../config/firebaseConfig';
 import { BlurView } from 'expo-blur';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Image } from 'react-native';
-
+import { useNavigation } from '@react-navigation/native';
 
 const screenWidth = Dimensions.get('window').width;
 
 const ProfileMenu = ({ visible, onClose, user }) => {
   const translateX = useRef(new Animated.Value(-screenWidth)).current;
   const [isVisible, setIsVisible] = useState(visible);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const navigation = useNavigation();
 
   useEffect(() => {
     if (visible) {
@@ -45,6 +48,10 @@ const ProfileMenu = ({ visible, onClose, user }) => {
   const handleLogout = async () => {
     try {
       await signOut(auth);
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Login' }],
+      });
     } catch (error) {
       Alert.alert('Erro', 'Não foi possível sair da conta.');
     }
@@ -67,10 +74,11 @@ const ProfileMenu = ({ visible, onClose, user }) => {
       </Pressable>
 
       <Animated.View style={[styles.menu, { transform: [{ translateX }] }]}>
-
         <View style={styles.header}>
           <Image
-            source={{ uri: 'https://i.pravatar.cc/300' }} // essa URL gera um rosto aleatório
+            source={{
+              uri: 'https://static1.srcdn.com/wordpress/wp-content/uploads/2017/07/Sir-Ian-McKellen-as-Gandalf-The-Grey-The-Shire-Lord-of-the-Rings-Peter-Jackson.jpg',
+            }}
             style={styles.avatar}
           />
 
@@ -96,11 +104,51 @@ const ProfileMenu = ({ visible, onClose, user }) => {
         <MenuItem icon="business" label="Secretaria" />
         <View style={styles.divider} />
         <MenuItem icon="settings" label="Configurações" />
-
         <View style={styles.divider} />
 
-        <MenuItem icon="log-out" label="Sair" color="#ef4444" onPress={handleLogout} />
+        <View style={{ flex: 1 }} />
+        <View style={styles.divider} />
+        <MenuItem
+          icon="log-out"
+          label="Sair"
+          color="#ef4444"
+          onPress={() => setShowLogoutModal(true)}
+        />
       </Animated.View>
+
+      {/* Modal Bonito de Confirmação */}
+      <Modal
+        transparent
+        animationType="fade"
+        visible={showLogoutModal}
+        onRequestClose={() => setShowLogoutModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Confirmar saída</Text>
+            <Text style={styles.modalText}>Deseja mesmo sair da conta?</Text>
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, { backgroundColor: '#ef4444' }]}
+                onPress={() => {
+                  setShowLogoutModal(false);
+                  handleLogout();
+                }}
+              >
+                <Text style={styles.modalButtonText}>Sim</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.modalButton, { backgroundColor: '#6b7280' }]}
+                onPress={() => setShowLogoutModal(false)}
+              >
+                <Text style={styles.modalButtonText}>Não</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -152,7 +200,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#6b7280',
   },
-
   item: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -172,6 +219,47 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: '#e5e7eb',
     marginVertical: 8,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    padding: 25,
+    borderRadius: 10,
+    width: '80%',
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#1e3a8a',
+    marginBottom: 10,
+  },
+  modalText: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 20,
+    color: '#374151',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  modalButton: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 8,
+    marginHorizontal: 5,
+  },
+  modalButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    textAlign: 'center',
   },
 });
 
