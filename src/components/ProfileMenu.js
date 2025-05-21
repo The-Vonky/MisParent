@@ -99,7 +99,7 @@ const ProfileMenu = ({ visible, onClose, user }) => {
         <View style={styles.divider} />
         <MenuItem icon="school" label="Materiais do Aluno" />
         <View style={styles.divider} />
-        <MenuItem icon="book" label="Plano de Aula" />
+        <MenuItem icon="book" label="Plano de Aula" onPress={() => navigation.navigate('PlanoDeAula')} />
         <View style={styles.divider} />
         <MenuItem icon="business" label="Secretaria" />
         <View style={styles.divider} />
