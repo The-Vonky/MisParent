@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
-  Alert, SafeAreaView, ScrollView, Image
+  Alert, SafeAreaView, ScrollView, Image, KeyboardAvoidingView, Platform
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { collection, addDoc } from 'firebase/firestore';
@@ -64,12 +64,11 @@ export default function CadastrarAlunoScreen() {
         matricula,
         email,
         imagemUri: imagemUri || null,
-        tipoUsuario, // <- aqui vai o tipo (Admin ou Responsável)
+        tipoUsuario,
         criadoEm: new Date(),
       });
 
       Alert.alert('Sucesso', 'Aluno cadastrado com sucesso!');
-      // Resetar campos
       setNome('');
       setIdade('');
       setResponsaveis('');
@@ -95,63 +94,69 @@ export default function CadastrarAlunoScreen() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#f8fafc' }}>
       <View style={styles.header}>
-        <Text style={styles.headerText}>Cadastro de Aluno</Text>
+        <Text style={styles.headerText}>🎓 Cadastro de Aluno</Text>
       </View>
-      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-        <TouchableOpacity style={styles.imagePicker} onPress={escolherImagem}>
-          {imagemUri ? (
-            <Image source={{ uri: imagemUri }} style={styles.image} />
-          ) : (
-            <Text style={styles.imageText}>Selecionar Foto</Text>
-          )}
-        </TouchableOpacity>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+          <TouchableOpacity style={styles.imagePicker} onPress={escolherImagem} activeOpacity={0.8}>
+            {imagemUri ? (
+              <Image source={{ uri: imagemUri }} style={styles.image} />
+            ) : (
+              <View style={styles.imagePlaceholder}>
+                <Text style={styles.imageText}>Selecionar Foto</Text>
+              </View>
+            )}
+          </TouchableOpacity>
 
-        <Text style={styles.label}>Nome do Aluno</Text>
-        <TextInput style={styles.input} value={nome} onChangeText={setNome} />
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Nome do Aluno</Text>
+            <TextInput style={styles.input} value={nome} onChangeText={setNome} placeholder="Digite o nome" />
 
-        <Text style={styles.label}>Idade ou Data de Nascimento</Text>
-        <TextInput style={styles.input} value={idade} onChangeText={setIdade} />
+            <Text style={styles.label}>Idade ou Data de Nascimento</Text>
+            <TextInput style={styles.input} value={idade} onChangeText={setIdade} placeholder="Ex: 5 anos ou 01/01/2020" />
 
-        <Text style={styles.label}>Nome dos Pais ou Responsáveis</Text>
-        <TextInput style={styles.input} value={responsaveis} onChangeText={setResponsaveis} />
+            <Text style={styles.label}>Nome dos Pais ou Responsáveis</Text>
+            <TextInput style={styles.input} value={responsaveis} onChangeText={setResponsaveis} placeholder="Digite os nomes" />
 
-        <Text style={styles.label}>Turma</Text>
-        <TextInput style={styles.input} value={turma} onChangeText={setTurma} />
+            <Text style={styles.label}>Turma</Text>
+            <TextInput style={styles.input} value={turma} onChangeText={setTurma} placeholder="Ex: Jardim I" />
 
-        <Text style={styles.label}>Número de Matrícula</Text>
-        <TextInput style={styles.input} value={matricula} onChangeText={setMatricula} />
+            <Text style={styles.label}>Número de Matrícula</Text>
+            <TextInput style={styles.input} value={matricula} onChangeText={setMatricula} placeholder="Número único" />
 
-        <Text style={styles.label}>Tipo de Usuário</Text>
-        <View style={styles.pickerContainer}>
-          <Picker
-            selectedValue={tipoUsuario}
-            onValueChange={setTipoUsuario}
-            style={{ height: 50 }}
-          >
-            <Picker.Item label="Responsável" value="Responsável" />
-            <Picker.Item label="Administrador" value="Administrador" />
-          </Picker>
-        </View>
+            <Text style={styles.label}>Tipo de Usuário</Text>
+            <View style={styles.pickerContainer}>
+              <Picker selectedValue={tipoUsuario} onValueChange={setTipoUsuario} style={{ height: 50 }}>
+                <Picker.Item label="Responsável" value="Responsável" />
+                <Picker.Item label="Administrador" value="Administrador" />
+              </Picker>
+            </View>
 
-        <Text style={styles.label}>E-mail</Text>
-        <TextInput
-          style={styles.input}
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
+            <Text style={styles.label}>E-mail</Text>
+            <TextInput
+              style={styles.input}
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              placeholder="exemplo@email.com"
+            />
 
-        <Text style={styles.label}>Senha</Text>
-        <TextInput style={styles.input} value={senha} onChangeText={setSenha} secureTextEntry />
+            <Text style={styles.label}>Senha</Text>
+            <TextInput style={styles.input} value={senha} onChangeText={setSenha} secureTextEntry placeholder="******" />
 
-        <Text style={styles.label}>Confirmar Senha</Text>
-        <TextInput style={styles.input} value={confirmarSenha} onChangeText={setConfirmarSenha} secureTextEntry />
+            <Text style={styles.label}>Confirmar Senha</Text>
+            <TextInput style={styles.input} value={confirmarSenha} onChangeText={setConfirmarSenha} secureTextEntry placeholder="******" />
 
-        <TouchableOpacity style={styles.button} onPress={handleCadastrar} activeOpacity={0.8}>
-          <Text style={styles.buttonText}>Cadastrar Aluno</Text>
-        </TouchableOpacity>
-      </ScrollView>
+            <TouchableOpacity style={styles.button} onPress={handleCadastrar} activeOpacity={0.9}>
+              <Text style={styles.buttonText}>Cadastrar Aluno</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -168,11 +173,22 @@ const styles = StyleSheet.create({
   },
   headerText: {
     color: '#fff',
-    fontSize: 22,
-    fontWeight: '700',
+    fontSize: 24,
+    fontWeight: 'bold',
   },
   container: {
     padding: 20,
+    paddingBottom: 60,
+  },
+  formGroup: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 6,
   },
   label: {
     fontSize: 16,
@@ -186,24 +202,24 @@ const styles = StyleSheet.create({
     borderColor: '#cbd5e1',
     padding: 12,
     borderRadius: 10,
-    backgroundColor: '#fff',
+    backgroundColor: '#f9fafb',
     fontSize: 16,
   },
   button: {
     backgroundColor: '#1e3a8a',
     paddingVertical: 16,
-    borderRadius: 10,
+    borderRadius: 12,
     marginTop: 30,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 4,
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 6,
   },
   buttonText: {
     color: '#fff',
     textAlign: 'center',
-    fontWeight: '600',
+    fontWeight: '700',
     fontSize: 16,
   },
   imagePicker: {
@@ -220,6 +236,14 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
+  },
+  imagePlaceholder: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: '#e2e8f0',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   pickerContainer: {
     borderWidth: 1,
