@@ -1,26 +1,63 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
-  Alert, SafeAreaView, ScrollView, Image, KeyboardAvoidingView, Platform
+  Alert, SafeAreaView, ScrollView, Image
 } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, orderBy } from 'firebase/firestore';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import * as ImagePicker from 'expo-image-picker';
+import { Ionicons } from '@expo/vector-icons';
+import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
+import moment from 'moment';
 
 import { auth, firestore } from '../config/firebaseConfig';
 
 export default function CadastrarAlunoScreen() {
   const [nome, setNome] = useState('');
+  const [dataNascimento, setDataNascimento] = useState(new Date());
   const [idade, setIdade] = useState('');
-  const [responsaveis, setResponsaveis] = useState('');
+  const [responsavel1, setResponsavel1] = useState('');
+  const [responsavel2, setResponsavel2] = useState('');
   const [turma, setTurma] = useState('');
   const [matricula, setMatricula] = useState('');
   const [email, setEmail] = useState('');
+  const [confirmarEmail, setConfirmarEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [confirmarSenha, setConfirmarSenha] = useState('');
+  const [mostrarSenha, setMostrarSenha] = useState(false);
   const [imagemUri, setImagemUri] = useState(null);
   const [tipoUsuario, setTipoUsuario] = useState('Responsável');
+  const [observacoes, setObservacoes] = useState('');
+
+  useEffect(() => {
+    gerarMatriculaSequencial();
+  }, []);
+
+  useEffect(() => {
+    calcularIdade();
+  }, [dataNascimento]);
+
+  const gerarMatriculaSequencial = async () => {
+    const q = query(collection(firestore, 'Alunos'), orderBy('matricula'));
+    const querySnapshot = await getDocs(q);
+    const total = querySnapshot.size + 1;
+    const novaMatricula = total.toString().padStart(6, '0');
+    setMatricula(novaMatricula);
+  };
+
+  const calcularIdade = () => {
+    const hoje = moment();
+    const nascimento = moment(dataNascimento);
+    const anos = hoje.diff(nascimento, 'years');
+    setIdade(anos.toString());
+  };
+
+  const padronizarNome = (texto) => {
+    return texto
+      .replace(/[^À-ſa-zA-Z ]+/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  };
 
   const escolherImagem = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -41,8 +78,13 @@ export default function CadastrarAlunoScreen() {
   };
 
   const handleCadastrar = async () => {
-    if (!nome || !idade || !responsaveis || !turma || !matricula || !email || !senha || !confirmarSenha) {
-      Alert.alert('Erro', 'Preencha todos os campos.');
+    if (!nome || !responsavel1 || !turma || !email || !confirmarEmail || !senha || !confirmarSenha) {
+      Alert.alert('Erro', 'Preencha todos os campos obrigatórios.');
+      return;
+    }
+
+    if (email !== confirmarEmail) {
+      Alert.alert('Erro', 'Os e-mails não coincidem.');
       return;
     }
 
@@ -57,106 +99,144 @@ export default function CadastrarAlunoScreen() {
 
       await addDoc(collection(firestore, 'Alunos'), {
         uid: user.uid,
-        nome,
+        nome: padronizarNome(nome),
+        dataNascimento: moment(dataNascimento).format('DD/MM/YYYY'),
         idade,
-        responsaveis,
+        responsaveis: [responsavel1, responsavel2].filter(Boolean),
         turma,
         matricula,
         email,
         imagemUri: imagemUri || null,
         tipoUsuario,
+        observacoes,
         criadoEm: new Date(),
       });
 
+      await addDoc(collection(firestore, 'Users'), {
+        email,
+        tipo: 'pai',
+      });
+
       Alert.alert('Sucesso', 'Aluno cadastrado com sucesso!');
-      setNome('');
-      setIdade('');
-      setResponsaveis('');
-      setTurma('');
-      setMatricula('');
-      setEmail('');
-      setSenha('');
-      setConfirmarSenha('');
-      setImagemUri(null);
-      setTipoUsuario('Responsável');
+      limparCampos();
     } catch (err) {
       console.log('Erro ao cadastrar:', err.code, err.message);
-      if (err.code === 'auth/email-already-in-use') {
-        Alert.alert('Erro', 'Esse e-mail já está em uso.');
-      } else if (err.code === 'auth/weak-password') {
-        Alert.alert('Erro', 'A senha deve ter pelo menos 6 caracteres.');
-      } else {
-        Alert.alert('Erro', 'Falha ao cadastrar aluno.');
-      }
+      Alert.alert('Erro', 'Não foi possível cadastrar.');
     }
+  };
+
+  const limparCampos = () => {
+    setNome('');
+    setDataNascimento(new Date());
+    setResponsavel1('');
+    setResponsavel2('');
+    setTurma('');
+    setEmail('');
+    setConfirmarEmail('');
+    setSenha('');
+    setConfirmarSenha('');
+    setImagemUri(null);
+    setObservacoes('');
   };
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#f8fafc' }}>
       <View style={styles.header}>
-        <Text style={styles.headerText}>🎓 Cadastro de Aluno</Text>
+        <Text style={styles.headerText}>Cadastro de Aluno</Text>
       </View>
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
-        <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-          <TouchableOpacity style={styles.imagePicker} onPress={escolherImagem} activeOpacity={0.8}>
-            {imagemUri ? (
-              <Image source={{ uri: imagemUri }} style={styles.image} />
-            ) : (
-              <View style={styles.imagePlaceholder}>
-                <Text style={styles.imageText}>Selecionar Foto</Text>
-              </View>
-            )}
+      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+        <TouchableOpacity style={styles.imagePicker} onPress={escolherImagem}>
+          {imagemUri ? (
+            <Image source={{ uri: imagemUri }} style={styles.image} />
+          ) : (
+            <Text style={styles.imageText}>Selecionar Foto</Text>
+          )}
+        </TouchableOpacity>
+
+        <Text style={styles.label}>Nome do Aluno</Text>
+        <TextInput style={styles.input} value={nome} onChangeText={setNome} />
+
+        <Text style={styles.label}>Data de Nascimento</Text>
+        <TouchableOpacity
+          onPress={() =>
+            DateTimePickerAndroid.open({
+              value: dataNascimento,
+              onChange: (event, selectedDate) => {
+                if (selectedDate) setDataNascimento(selectedDate);
+              },
+              mode: 'date',
+              is24Hour: true,
+            })
+          }
+          style={styles.input}
+        >
+          <Text>{moment(dataNascimento).format('DD/MM/YYYY')}</Text>
+        </TouchableOpacity>
+
+        <Text style={styles.label}>Idade Calculada</Text>
+        <TextInput style={[styles.input, { backgroundColor: '#e5e7eb' }]} value={idade} editable={false} />
+
+        <Text style={styles.label}>Nome dos Responsáveis</Text>
+        <TextInput style={styles.input} placeholder="Responsável 1" value={responsavel1} onChangeText={setResponsavel1} />
+        <TextInput style={styles.input} placeholder="Responsável 2 (opcional)" value={responsavel2} onChangeText={setResponsavel2} />
+
+        <Text style={styles.label}>Turma</Text>
+        <TextInput style={styles.input} value={turma} onChangeText={setTurma} />
+
+        <Text style={styles.label}>Número de Matrícula</Text>
+        <TextInput style={[styles.input, { backgroundColor: '#e5e7eb' }]} value={matricula} editable={false} />
+
+        <Text style={styles.label}>Observações</Text>
+        <TextInput
+          style={[styles.input, { height: 100, textAlignVertical: 'top' }]}
+          value={observacoes}
+          onChangeText={setObservacoes}
+          multiline
+        />
+
+        <Text style={styles.label}>E-mail</Text>
+        <TextInput
+          style={styles.input}
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+
+        <Text style={styles.label}>Confirmar E-mail</Text>
+        <TextInput
+          style={styles.input}
+          value={confirmarEmail}
+          onChangeText={setConfirmarEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+
+        <Text style={styles.label}>Senha</Text>
+        <View style={styles.senhaContainer}>
+          <TextInput
+            style={styles.senhaInput}
+            value={senha}
+            onChangeText={setSenha}
+            secureTextEntry={!mostrarSenha}
+          />
+          <TouchableOpacity onPress={() => setMostrarSenha(!mostrarSenha)}>
+            <Ionicons name={mostrarSenha ? 'eye-off' : 'eye'} size={20} color="#1e3a8a" />
           </TouchableOpacity>
+        </View>
 
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Nome do Aluno</Text>
-            <TextInput style={styles.input} value={nome} onChangeText={setNome} placeholder="Digite o nome" />
+        <Text style={styles.label}>Confirmar Senha</Text>
+        <TextInput
+          style={styles.input}
+          value={confirmarSenha}
+          onChangeText={setConfirmarSenha}
+          secureTextEntry={!mostrarSenha}
+        />
 
-            <Text style={styles.label}>Idade ou Data de Nascimento</Text>
-            <TextInput style={styles.input} value={idade} onChangeText={setIdade} placeholder="Ex: 5 anos ou 01/01/2020" />
-
-            <Text style={styles.label}>Nome dos Pais ou Responsáveis</Text>
-            <TextInput style={styles.input} value={responsaveis} onChangeText={setResponsaveis} placeholder="Digite os nomes" />
-
-            <Text style={styles.label}>Turma</Text>
-            <TextInput style={styles.input} value={turma} onChangeText={setTurma} placeholder="Ex: Jardim I" />
-
-            <Text style={styles.label}>Número de Matrícula</Text>
-            <TextInput style={styles.input} value={matricula} onChangeText={setMatricula} placeholder="Número único" />
-
-            <Text style={styles.label}>Tipo de Usuário</Text>
-            <View style={styles.pickerContainer}>
-              <Picker selectedValue={tipoUsuario} onValueChange={setTipoUsuario} style={{ height: 50 }}>
-                <Picker.Item label="Responsável" value="Responsável" />
-                <Picker.Item label="Administrador" value="Administrador" />
-              </Picker>
-            </View>
-
-            <Text style={styles.label}>E-mail</Text>
-            <TextInput
-              style={styles.input}
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              placeholder="exemplo@email.com"
-            />
-
-            <Text style={styles.label}>Senha</Text>
-            <TextInput style={styles.input} value={senha} onChangeText={setSenha} secureTextEntry placeholder="******" />
-
-            <Text style={styles.label}>Confirmar Senha</Text>
-            <TextInput style={styles.input} value={confirmarSenha} onChangeText={setConfirmarSenha} secureTextEntry placeholder="******" />
-
-            <TouchableOpacity style={styles.button} onPress={handleCadastrar} activeOpacity={0.9}>
-              <Text style={styles.buttonText}>Cadastrar Aluno</Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+        <TouchableOpacity style={styles.button} onPress={handleCadastrar} activeOpacity={0.8}>
+          <Text style={styles.buttonText}>Cadastrar Aluno</Text>
+        </TouchableOpacity>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -173,22 +253,11 @@ const styles = StyleSheet.create({
   },
   headerText: {
     color: '#fff',
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 22,
+    fontWeight: '700',
   },
   container: {
     padding: 20,
-    paddingBottom: 60,
-  },
-  formGroup: {
-    backgroundColor: '#fff',
-    borderRadius: 20,
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 6,
   },
   label: {
     fontSize: 16,
@@ -202,24 +271,38 @@ const styles = StyleSheet.create({
     borderColor: '#cbd5e1',
     padding: 12,
     borderRadius: 10,
-    backgroundColor: '#f9fafb',
+    backgroundColor: '#fff',
+    fontSize: 16,
+  },
+  senhaContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#cbd5e1',
+    borderRadius: 10,
+    backgroundColor: '#fff',
+    paddingHorizontal: 12,
+  },
+  senhaInput: {
+    flex: 1,
+    paddingVertical: 12,
     fontSize: 16,
   },
   button: {
     backgroundColor: '#1e3a8a',
     paddingVertical: 16,
-    borderRadius: 12,
+    borderRadius: 10,
     marginTop: 30,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 6,
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 4,
   },
   buttonText: {
     color: '#fff',
     textAlign: 'center',
-    fontWeight: '700',
+    fontWeight: '600',
     fontSize: 16,
   },
   imagePicker: {
@@ -236,20 +319,5 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-  },
-  imagePlaceholder: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: '#e2e8f0',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  pickerContainer: {
-    borderWidth: 1,
-    borderColor: '#cbd5e1',
-    borderRadius: 10,
-    overflow: 'hidden',
-    backgroundColor: '#fff',
   },
 });
