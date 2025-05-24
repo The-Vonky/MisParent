@@ -16,7 +16,7 @@ const Stack = createNativeStackNavigator();
 export default function StackNavigator() {
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <Stack.Navigator initialRouteName="Login">
+      <Stack.Navigator initialRouteName="Home">
         <Stack.Screen
           name="Login"
           component={LoginScreen}
