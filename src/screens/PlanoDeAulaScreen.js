@@ -11,7 +11,6 @@ import { useNavigation } from '@react-navigation/native';
 import { TouchableOpacity } from 'react-native';
 
 
-
 const escolhas = {
   'Matéria': [
     { id: '1', materia: 'Português' },
@@ -91,6 +90,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     backgroundColor: '#FFF',
+    gap: 40,
   },
 
   box: {
@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
     width: '85%',
     height: 40,
     backgroundColor: '#F8FAFC',
-    marginTop: 40,
+
     borderWidth: 1,
     borderColor: '#CBD5E1',
     borderRadius: 10,
