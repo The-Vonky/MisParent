@@ -9,12 +9,13 @@ import {
   Pressable,
   Alert,
   Modal,
+  SafeAreaView,
+  Image,
 } from 'react-native';
 import { signOut } from 'firebase/auth';
 import { auth } from '../config/firebaseConfig';
 import { BlurView } from 'expo-blur';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 const screenWidth = Dimensions.get('window').width;
@@ -74,49 +75,50 @@ const ProfileMenu = ({ visible, onClose, user }) => {
       </Pressable>
 
       <Animated.View style={[styles.menu, { transform: [{ translateX }] }]}>
-        <View style={styles.header}>
-          <Image
-            source={{
-              uri: 'https://static1.srcdn.com/wordpress/wp-content/uploads/2017/07/Sir-Ian-McKellen-as-Gandalf-The-Grey-The-Shire-Lord-of-the-Rings-Peter-Jackson.jpg',
-            }}
-            style={styles.avatar}
-          />
+        <SafeAreaView style={{ flex: 1 }}>
+          <View style={styles.header}>
+            <Image
+              source={{
+                uri: 'https://static1.srcdn.com/wordpress/wp-content/uploads/2017/07/Sir-Ian-McKellen-as-Gandalf-The-Grey-The-Shire-Lord-of-the-Rings-Peter-Jackson.jpg',
+              }}
+              style={styles.avatar}
+            />
 
-          <View style={styles.infoContainer}>
-            <Text style={styles.username}>{user?.name || 'Nome do Usuário'}</Text>
-            <Text style={styles.role}>{user?.role || 'Tipo do Usuário'}</Text>
+            <View style={styles.infoContainer}>
+              <Text style={styles.username}>{user?.name || 'Nome do Usuário'}</Text>
+              <Text style={styles.role}>{user?.role || 'Tipo do Usuário'}</Text>
+            </View>
           </View>
-        </View>
 
-        <View style={styles.divider} />
-        <MenuItem icon="person" label="Gerenciar Usuário" />
-        <View style={styles.divider} />
-        <MenuItem icon="calendar" label="Grade de Horários" />
-        <View style={styles.divider} />
-        <MenuItem icon="list" label="Atividades e Tarefas" />
-        <View style={styles.divider} />
-        <MenuItem icon="checkbox" label="Frequência" />
-        <View style={styles.divider} />
-        <MenuItem icon="school" label="Materiais do Aluno" />
-        <View style={styles.divider} />
-        <MenuItem icon="book" label="Plano de Aula" />
-        <View style={styles.divider} />
-        <MenuItem icon="business" label="Secretaria" />
-        <View style={styles.divider} />
-        <MenuItem icon="settings" label="Configurações" />
-        <View style={styles.divider} />
+          <View style={styles.divider} />
+          <MenuItem icon="person" label="Gerenciar Usuário" />
+          <View style={styles.divider} />
+          <MenuItem icon="calendar" label="Grade de Horários" />
+          <View style={styles.divider} />
+          <MenuItem icon="list" label="Atividades e Tarefas" />
+          <View style={styles.divider} />
+          <MenuItem icon="checkbox" label="Frequência" />
+          <View style={styles.divider} />
+          <MenuItem icon="school" label="Materiais do Aluno" />
+          <View style={styles.divider} />
+          <MenuItem icon="book" label="Plano de Aula" />
+          <View style={styles.divider} />
+          <MenuItem icon="business" label="Secretaria" />
+          <View style={styles.divider} />
+          <MenuItem icon="settings" label="Configurações" />
+          <View style={styles.divider} />
 
-        <View style={{ flex: 1 }} />
-        <View style={styles.divider} />
-        <MenuItem
-          icon="log-out"
-          label="Sair"
-          color="#ef4444"
-          onPress={() => setShowLogoutModal(true)}
-        />
+          <View style={{ flex: 1 }} />
+          <View style={styles.divider} />
+          <MenuItem
+            icon="log-out"
+            label="Sair"
+            color="#ef4444"
+            onPress={() => setShowLogoutModal(true)}
+          />
+        </SafeAreaView>
       </Animated.View>
 
-      {/* Modal Bonito de Confirmação */}
       <Modal
         transparent
         animationType="fade"
