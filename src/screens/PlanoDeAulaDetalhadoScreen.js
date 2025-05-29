@@ -5,6 +5,7 @@ import MessagesModal from '../components/MessagesModal';
 import NotificationModal from '../components/NotificationModal';
 import ProfileMenu from '../components/ProfileMenu';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import Feather from 'react-native-vector-icons/Feather';
 import { useNavigation } from '@react-navigation/native';
 import React, { useState, useRef } from 'react';
 import { Animated, TouchableOpacity, View, Text, StyleSheet } from 'react-native';
@@ -34,7 +35,7 @@ const PlanoDeAulaDetalhadoScreen = ({ route }) => {
   const { materia } = route.params;
 
   const [expandido, setExpandido] = useState(false);
-  const [contentHeight, setContentHeight] = useState(0); // NOVO
+  const [contentHeight, setContentHeight] = useState(0);
 
     const toggleExpand = () => {
     const toValue = expandido ? 0 : contentHeight;
@@ -106,8 +107,11 @@ const PlanoDeAulaDetalhadoScreen = ({ route }) => {
 
             <View style={styles.body}>
                 <View style={styles.box}>
-                    <Text style={styles.title}>Plano De Aula:</Text>
-                    <Text style={styles.materia}>{materia}</Text>
+                    <Feather name="log-out" size={30} color="#FF0000" onPress={() => navigation.navigate('PlanoDeAula')} />
+                    <View style={styles.text2}>
+                        <Text style={styles.title}>Plano De Aula: </Text>
+                        <Text style={styles.materia}>{materia}</Text>
+                    </View>
                 </View>
                 <TouchableOpacity onPress={toggleExpand} activeOpacity={0.8}>
                     <View style={styles.box2}>
@@ -181,7 +185,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         borderStyle: 'solid',
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'space-evenly',
     },
 
     box2: {
@@ -215,6 +219,12 @@ const styles = StyleSheet.create({
     text: {
         fontSize: 16,
         marginTop: 5,
+    },
+
+    text2: {
+        flexDirection: 'row',
+        justifyContent: 'flex-start',
+        marginRight: 25,
     },
 
     divider: {

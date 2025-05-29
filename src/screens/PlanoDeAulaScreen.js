@@ -7,6 +7,7 @@ import MessagesModal from '../components/MessagesModal';
 import NotificationModal from '../components/NotificationModal';
 import ProfileMenu from '../components/ProfileMenu';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import Feather from 'react-native-vector-icons/Feather';
 import { useNavigation } from '@react-navigation/native';
 import { TouchableOpacity } from 'react-native';
 
@@ -48,6 +49,7 @@ const PlanoDeAulaScreen = () => {
     <View style={styles.body}>
 
       <View style={styles.box}>
+        <Feather name="log-out" size={30} color="#FF0000" onPress={() => navigation.navigate('Home')} />
         <Text style={styles.text}>Plano de Aula</Text>
       </View>
       
@@ -95,7 +97,8 @@ const styles = StyleSheet.create({
 
   box: {
     width: '70%',
-    height: 40,
+    flexDirection: 'row',
+    height: 50,
     backgroundColor: '#F8FAFC',
     marginTop: 20,
     borderWidth: 1,
@@ -103,7 +106,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderStyle: 'solid',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-evenly',
   },
 
   box2: {
@@ -112,7 +115,7 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
     paddingRight: 10,
     width: '85%',
-    height: 40,
+    height: 55,
     backgroundColor: '#F8FAFC',
 
     borderWidth: 1,
@@ -126,6 +129,7 @@ const styles = StyleSheet.create({
   text: {
     color: '#000',
     fontSize: 20,
+    marginRight: 30,
   },
 
 })
