@@ -153,7 +153,7 @@ export default function CadastrarAlunoScreen() {
 
       await setDoc(doc(firestore, 'Users', user.uid), {
         email,
-        tipo: 'pai',
+        role: 'pai',
       });
 
       Alert.alert('Sucesso', 'Aluno cadastrado com sucesso!');
