@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, ScrollView } from 'react-native';
+import { FontAwesome5 } from '@expo/vector-icons'; // ou 'react-native-vector-icons/FontAwesome5'
 
 export default function PerfilAlunoScreen() {
   return (
@@ -8,15 +9,15 @@ export default function PerfilAlunoScreen() {
       <View style={styles.card}>
         <View style={styles.headerRow}>
           <Image
-            source={{ uri: 'https://i.imgur.com/bPzB2rS.png' }} // substitua pela imagem real do aluno
+            source={{ uri: 'https://i.imgur.com/bPzB2rS.png' }}
             style={styles.profileImage}
           />
           <View style={styles.infoContainer}>
-            <Text style={styles.label}>Nº de Matrícula: <Text style={styles.value}>00000001</Text></Text>
-            <Text style={styles.label}>Nome do Estudante: <Text style={styles.value}>Mordecai</Text></Text>
-            <Text style={styles.label}>Data de Nascimento: <Text style={styles.value}>07/07/1987</Text></Text>
-            <Text style={styles.label}>Escola: <Text style={styles.value}>Mind International School - MIS</Text></Text>
-            <Text style={styles.label}>Observações: <Text style={styles.value}>Gaio Azul</Text></Text>
+            <ProfileItem label="Matrícula" value="00000001" />
+            <ProfileItem label="Nome" value="Mordecai" />
+            <ProfileItem label="Nascimento" value="07/07/1987" />
+            <ProfileItem label="Escola" value="Mind International School - MIS" />
+            <ProfileItem label="Observações" value="Gaio Azul" />
           </View>
         </View>
         <View style={styles.misLogoContainer}>
@@ -25,32 +26,52 @@ export default function PerfilAlunoScreen() {
       </View>
 
       {/* Resumo de Tarefas */}
-      <View style={[styles.taskCard, { backgroundColor: '#6A7FFF' }]}>
-        <Text style={styles.taskText}>Deveres de Casa Feitos:</Text>
-        <Text style={styles.taskNumber}>12</Text>
-      </View>
-
-      <View style={[styles.taskCard, { backgroundColor: '#FF3B3B' }]}>
-        <Text style={styles.taskText}>Deveres de Casa a fazer:</Text>
-        <Text style={styles.taskNumber}>2</Text>
+      <View style={styles.taskRow}>
+        <TaskCard
+          color="#4CAF50"
+          icon="check-circle"
+          title="Deveres feitos"
+          count={12}
+        />
+        <TaskCard
+          color="#F44336"
+          icon="exclamation-circle"
+          title="A fazer"
+          count={2}
+        />
       </View>
     </ScrollView>
   );
 }
 
+// COMPONENTES INTERNOS
+const ProfileItem = ({ label, value }) => (
+  <Text style={styles.label}>
+    {label}: <Text style={styles.value}>{value}</Text>
+  </Text>
+);
+
+const TaskCard = ({ color, icon, title, count }) => (
+  <View style={[styles.taskCard, { backgroundColor: color }]}>
+    <FontAwesome5 name={icon} size={24} color="#FFF" style={{ marginBottom: 10 }} />
+    <Text style={styles.taskText}>{title}</Text>
+    <Text style={styles.taskNumber}>{count}</Text>
+  </View>
+);
+
 const styles = StyleSheet.create({
   container: {
     padding: 20,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F4F6FA',
     flexGrow: 1,
     alignItems: 'center',
   },
   card: {
-    backgroundColor: '#FF8C32',
-    borderRadius: 10,
+    backgroundColor: '#FFA726',
+    borderRadius: 16,
     padding: 20,
     width: '100%',
-    elevation: 3,
+    elevation: 4,
     marginBottom: 20,
   },
   headerRow: {
@@ -58,46 +79,56 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   profileImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 10,
+    width: 90,
+    height: 90,
+    borderRadius: 12,
     marginRight: 15,
+    borderWidth: 2,
+    borderColor: '#FFF',
   },
   infoContainer: {
     flex: 1,
   },
   label: {
-    fontWeight: 'bold',
-    marginBottom: 4,
-    color: '#000',
+    fontWeight: '600',
+    marginBottom: 5,
+    color: '#333',
+    fontSize: 14,
   },
   value: {
-    fontWeight: 'normal',
+    fontWeight: '400',
+    color: '#111',
   },
   misLogoContainer: {
-    marginTop: 10,
+    marginTop: 12,
     alignItems: 'flex-end',
   },
   misLogo: {
     fontWeight: 'bold',
-    fontSize: 20,
-    color: '#00008B',
+    fontSize: 22,
+    color: '#003366',
+  },
+  taskRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    gap: 15,
   },
   taskCard: {
-    borderRadius: 15,
+    flex: 1,
+    borderRadius: 16,
     padding: 20,
-    width: '100%',
-    marginBottom: 15,
     alignItems: 'center',
   },
   taskText: {
     color: '#FFF',
-    fontSize: 18,
-    marginBottom: 10,
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 4,
   },
   taskNumber: {
     color: '#FFF',
-    fontSize: 40,
+    fontSize: 32,
     fontWeight: 'bold',
   },
 });
