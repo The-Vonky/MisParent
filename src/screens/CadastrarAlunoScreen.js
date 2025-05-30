@@ -1,96 +1,190 @@
-import React, { useState } from 'react';
+// imports...
+import { useState, useEffect } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   Alert, SafeAreaView, ScrollView, Image
 } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, doc, setDoc, getDocs, query, orderBy } from 'firebase/firestore';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import * as ImagePicker from 'expo-image-picker';
-
+import { Ionicons } from '@expo/vector-icons';
+import moment from 'moment';
 import { auth, firestore } from '../config/firebaseConfig';
 
 export default function CadastrarAlunoScreen() {
   const [nome, setNome] = useState('');
+  const [dataNascimento, setDataNascimento] = useState('');
   const [idade, setIdade] = useState('');
-  const [responsaveis, setResponsaveis] = useState('');
+  const [responsavel1, setResponsavel1] = useState('');
+  const [responsavel2, setResponsavel2] = useState('');
   const [turma, setTurma] = useState('');
   const [matricula, setMatricula] = useState('');
   const [email, setEmail] = useState('');
+  const [confirmarEmail, setConfirmarEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [confirmarSenha, setConfirmarSenha] = useState('');
+  const [mostrarSenha, setMostrarSenha] = useState(false);
   const [imagemUri, setImagemUri] = useState(null);
-  const [tipoUsuario, setTipoUsuario] = useState('Responsável');
+  const [observacoes, setObservacoes] = useState('');
+  const [erros, setErros] = useState({});
+
+  useEffect(() => {
+    gerarMatriculaSequencial();
+  }, []);
+
+  useEffect(() => {
+    if (validarData(dataNascimento)) calcularIdade();
+    else setIdade('');
+  }, [dataNascimento]);
+
+  const gerarMatriculaSequencial = async () => {
+    const q = query(collection(firestore, 'Alunos'), orderBy('matricula'));
+    const querySnapshot = await getDocs(q);
+    const total = querySnapshot.size + 1;
+    const novaMatricula = total.toString().padStart(6, '0');
+    setMatricula(novaMatricula);
+  };
+
+  const calcularIdade = () => {
+    const data = moment(dataNascimento, 'DD/MM/YYYY');
+    const hoje = moment();
+    const anos = hoje.diff(data, 'years');
+    setIdade(anos.toString());
+  };
+
+  const padronizarNome = (texto) => {
+    return texto.replace(/[^\p{L} ]+/gu, '').replace(/\s+/g, ' ').trim();
+  };
+
+  const formatarData = (texto) => {
+    const digits = texto.replace(/\D/g, '');
+    let formatado = '';
+
+    if (digits.length <= 2) formatado = digits;
+    else if (digits.length <= 4) formatado = `${digits.slice(0, 2)}/${digits.slice(2)}`;
+    else formatado = `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4, 8)}`;
+
+    setDataNascimento(formatado);
+  };
+
+  const validarData = (data) => {
+    if (!data || data.length !== 10) return false;
+    const [dia, mes, ano] = data.split('/').map(Number);
+    if (!dia || !mes || !ano) return false;
+    if (dia < 1 || dia > 31 || mes < 1 || mes > 12) return false;
+    const anoAtual = new Date().getFullYear();
+    if (ano < 1900 || ano > anoAtual) return false;
+
+    // Usa moment para validar formato e validade real
+    const dataMoment = moment(data, 'DD/MM/YYYY', true);
+    if (!dataMoment.isValid()) return false;
+
+    // Não permite data futura
+    if (dataMoment.isAfter(moment())) return false;
+
+    return true;
+  };
 
   const escolherImagem = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Permissão necessária', 'Precisamos de acesso à galeria.');
+      Alert.alert('Permissão negada', 'É necessário permitir acesso à câmera.');
       return;
     }
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      quality: 0.7,
-    });
-
-    if (!result.canceled) {
-      setImagemUri(result.assets[0].uri);
-    }
+    Alert.alert('Foto do Aluno', 'Escolha uma opção', [
+      {
+        text: 'Galeria',
+        onPress: async () => {
+          const galeria = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            quality: 0.7,
+          });
+          if (!galeria.canceled) setImagemUri(galeria.assets[0].uri);
+        },
+      },
+      {
+        text: 'Câmera',
+        onPress: async () => {
+          const camera = await ImagePicker.launchCameraAsync({
+            allowsEditing: true,
+            quality: 0.7,
+          });
+          if (!camera.canceled) setImagemUri(camera.assets[0].uri);
+        },
+      },
+      { text: 'Cancelar', style: 'cancel' },
+    ]);
   };
 
   const handleCadastrar = async () => {
-    if (!nome || !idade || !responsaveis || !turma || !matricula || !email || !senha || !confirmarSenha) {
-      Alert.alert('Erro', 'Preencha todos os campos.');
-      return;
-    }
+    const novosErros = {};
+    if (!nome) novosErros.nome = 'Nome obrigatório';
+    if (!validarData(dataNascimento)) novosErros.dataNascimento = 'Data inválida';
+    if (!responsavel1) novosErros.responsavel1 = 'Responsável obrigatório';
+    if (!turma) novosErros.turma = 'Turma obrigatória';
+    if (!email) novosErros.email = 'E-mail obrigatório';
+    if (email !== confirmarEmail) novosErros.confirmarEmail = 'E-mails não coincidem';
+    if (!senha) novosErros.senha = 'Senha obrigatória';
+    if (senha !== confirmarSenha) novosErros.confirmarSenha = 'Senhas não coincidem';
 
-    if (senha !== confirmarSenha) {
-      Alert.alert('Erro', 'As senhas não coincidem.');
-      return;
-    }
+    setErros(novosErros);
+    if (Object.keys(novosErros).length > 0) return;
 
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
       const user = userCredential.user;
 
-      await addDoc(collection(firestore, 'Alunos'), {
+      // Cria documento com o UID do usuário (garante link entre auth e dados)
+      await setDoc(doc(firestore, 'Alunos', user.uid), {
         uid: user.uid,
-        nome,
+        nome: padronizarNome(nome),
+        dataNascimento,
         idade,
-        responsaveis,
+        responsaveis: [responsavel1, responsavel2].filter(Boolean),
         turma,
         matricula,
         email,
         imagemUri: imagemUri || null,
-        tipoUsuario, // <- aqui vai o tipo (Admin ou Responsável)
+        observacoes,
         criadoEm: new Date(),
       });
 
+      await setDoc(doc(firestore, 'Users', user.uid), {
+        email,
+        tipo: 'pai',
+      });
+
       Alert.alert('Sucesso', 'Aluno cadastrado com sucesso!');
-      // Resetar campos
-      setNome('');
-      setIdade('');
-      setResponsaveis('');
-      setTurma('');
-      setMatricula('');
-      setEmail('');
-      setSenha('');
-      setConfirmarSenha('');
-      setImagemUri(null);
-      setTipoUsuario('Responsável');
+      limparCampos();
+      gerarMatriculaSequencial(); // Atualiza matrícula para próximo aluno
     } catch (err) {
-      console.log('Erro ao cadastrar:', err.code, err.message);
-      if (err.code === 'auth/email-already-in-use') {
-        Alert.alert('Erro', 'Esse e-mail já está em uso.');
-      } else if (err.code === 'auth/weak-password') {
-        Alert.alert('Erro', 'A senha deve ter pelo menos 6 caracteres.');
-      } else {
-        Alert.alert('Erro', 'Falha ao cadastrar aluno.');
-      }
+      Alert.alert('Erro', 'Não foi possível cadastrar.');
+      console.log(err);
     }
   };
+
+  const limparCampos = () => {
+    setNome('');
+    setDataNascimento('');
+    setResponsavel1('');
+    setResponsavel2('');
+    setTurma('');
+    setEmail('');
+    setConfirmarEmail('');
+    setSenha('');
+    setConfirmarSenha('');
+    setImagemUri(null);
+    setObservacoes('');
+    setErros({});
+    setIdade('');
+  };
+
+  const inputStyle = (campo) => [
+    styles.input,
+    erros[campo] && { borderColor: 'red', backgroundColor: '#fee2e2' },
+  ];
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#f8fafc' }}>
@@ -102,54 +196,102 @@ export default function CadastrarAlunoScreen() {
           {imagemUri ? (
             <Image source={{ uri: imagemUri }} style={styles.image} />
           ) : (
-            <Text style={styles.imageText}>Selecionar Foto</Text>
+            <View style={styles.imageCircle}><Text style={styles.imageText}>Selecionar Foto</Text></View>
           )}
         </TouchableOpacity>
 
         <Text style={styles.label}>Nome do Aluno</Text>
-        <TextInput style={styles.input} value={nome} onChangeText={setNome} />
+        <TextInput style={inputStyle('nome')} value={nome} onChangeText={setNome} />
+        {erros.nome && <Text style={styles.error}>{erros.nome}</Text>}
 
-        <Text style={styles.label}>Idade ou Data de Nascimento</Text>
-        <TextInput style={styles.input} value={idade} onChangeText={setIdade} />
+        <Text style={styles.label}>Data de Nascimento</Text>
+        <TextInput
+          style={inputStyle('dataNascimento')}
+          value={dataNascimento}
+          onChangeText={formatarData}
+          keyboardType="numeric"
+          placeholder="DD/MM/AAAA"
+          maxLength={10}
+        />
+        {erros.dataNascimento && <Text style={styles.error}>{erros.dataNascimento}</Text>}
 
-        <Text style={styles.label}>Nome dos Pais ou Responsáveis</Text>
-        <TextInput style={styles.input} value={responsaveis} onChangeText={setResponsaveis} />
+        <Text style={styles.label}>Idade Calculada</Text>
+        <TextInput style={[styles.input, { backgroundColor: '#e5e7eb' }]} value={idade} editable={false} />
+
+        <Text style={styles.label}>Responsável 1</Text>
+        <TextInput style={inputStyle('responsavel1')} value={responsavel1} onChangeText={setResponsavel1} />
+        {erros.responsavel1 && <Text style={styles.error}>{erros.responsavel1}</Text>}
+
+        <Text style={styles.label}>Responsável 2 (opcional)</Text>
+        <TextInput style={styles.input} value={responsavel2} onChangeText={setResponsavel2} />
 
         <Text style={styles.label}>Turma</Text>
-        <TextInput style={styles.input} value={turma} onChangeText={setTurma} />
+        <TextInput style={inputStyle('turma')} value={turma} onChangeText={setTurma} />
+        {erros.turma && <Text style={styles.error}>{erros.turma}</Text>}
 
         <Text style={styles.label}>Número de Matrícula</Text>
-        <TextInput style={styles.input} value={matricula} onChangeText={setMatricula} />
+        <TextInput style={[styles.input, { backgroundColor: '#e5e7eb' }]} value={matricula} editable={false} />
 
-        <Text style={styles.label}>Tipo de Usuário</Text>
-        <View style={styles.pickerContainer}>
-          <Picker
-            selectedValue={tipoUsuario}
-            onValueChange={setTipoUsuario}
-            style={{ height: 50 }}
-          >
-            <Picker.Item label="Responsável" value="Responsável" />
-            <Picker.Item label="Administrador" value="Administrador" />
-          </Picker>
-        </View>
+        <Text style={styles.label}>Observações</Text>
+        <TextInput
+          style={[styles.input, { height: 100, textAlignVertical: 'top' }]}
+          value={observacoes}
+          onChangeText={setObservacoes}
+          multiline
+        />
 
         <Text style={styles.label}>E-mail</Text>
         <TextInput
-          style={styles.input}
+          style={inputStyle('email')}
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
           autoCapitalize="none"
         />
+        {erros.email && <Text style={styles.error}>{erros.email}</Text>}
+
+        <Text style={styles.label}>Confirmar E-mail</Text>
+        <TextInput
+          style={inputStyle('confirmarEmail')}
+          value={confirmarEmail}
+          onChangeText={setConfirmarEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+        {erros.confirmarEmail && <Text style={styles.error}>{erros.confirmarEmail}</Text>}
 
         <Text style={styles.label}>Senha</Text>
-        <TextInput style={styles.input} value={senha} onChangeText={setSenha} secureTextEntry />
+        <View style={[styles.senhaContainer, erros.senha && { borderColor: 'red', backgroundColor: '#fee2e2' }]}>
+          <TextInput
+            style={styles.senhaInput}
+            value={senha}
+            onChangeText={setSenha}
+            secureTextEntry={!mostrarSenha}
+            autoCapitalize="none"
+          />
+          <TouchableOpacity onPress={() => setMostrarSenha(!mostrarSenha)}>
+            <Ionicons name={mostrarSenha ? 'eye' : 'eye-off'} size={24} color="gray" />
+          </TouchableOpacity>
+        </View>
+        {erros.senha && <Text style={styles.error}>{erros.senha}</Text>}
 
         <Text style={styles.label}>Confirmar Senha</Text>
-        <TextInput style={styles.input} value={confirmarSenha} onChangeText={setConfirmarSenha} secureTextEntry />
+        <View style={[styles.senhaContainer, erros.confirmarSenha && { borderColor: 'red', backgroundColor: '#fee2e2' }]}>
+          <TextInput
+            style={styles.senhaInput}
+            value={confirmarSenha}
+            onChangeText={setConfirmarSenha}
+            secureTextEntry={!mostrarSenha}
+            autoCapitalize="none"
+          />
+          <TouchableOpacity onPress={() => setMostrarSenha(!mostrarSenha)}>
+            <Ionicons name={mostrarSenha ? 'eye' : 'eye-off'} size={24} color="gray" />
+          </TouchableOpacity>
+        </View>
+        {erros.confirmarSenha && <Text style={styles.error}>{erros.confirmarSenha}</Text>}
 
-        <TouchableOpacity style={styles.button} onPress={handleCadastrar} activeOpacity={0.8}>
-          <Text style={styles.buttonText}>Cadastrar Aluno</Text>
+        <TouchableOpacity style={styles.botao} onPress={handleCadastrar}>
+          <Text style={styles.botaoTexto}>Cadastrar</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
@@ -158,74 +300,82 @@ export default function CadastrarAlunoScreen() {
 
 const styles = StyleSheet.create({
   header: {
-    paddingTop: 60,
-    paddingBottom: 24,
-    backgroundColor: '#1e3a8a',
-    alignItems: 'center',
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-    elevation: 4,
+    backgroundColor: '#2563eb',
+    padding: 15,
   },
   headerText: {
     color: '#fff',
-    fontSize: 22,
-    fontWeight: '700',
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
   container: {
-    padding: 20,
+    padding: 15,
+    paddingBottom: 40,
   },
   label: {
+    fontWeight: 'bold',
+    marginTop: 15,
+    marginBottom: 5,
     fontSize: 16,
-    fontWeight: '600',
-    color: '#1e3a8a',
-    marginBottom: 6,
-    marginTop: 20,
   },
   input: {
-    borderWidth: 1,
-    borderColor: '#cbd5e1',
-    padding: 12,
-    borderRadius: 10,
     backgroundColor: '#fff',
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    padding: 10,
     fontSize: 16,
   },
-  button: {
-    backgroundColor: '#1e3a8a',
-    paddingVertical: 16,
-    borderRadius: 10,
-    marginTop: 30,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  buttonText: {
-    color: '#fff',
-    textAlign: 'center',
-    fontWeight: '600',
-    fontSize: 16,
+  error: {
+    color: 'red',
+    marginTop: 4,
   },
   imagePicker: {
+    alignSelf: 'center',
+    marginBottom: 10,
+  },
+  imageCircle: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: '#e5e7eb',
+    justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20,
-    marginTop: 20,
   },
   imageText: {
-    fontSize: 16,
-    color: '#1e3a8a',
-    fontWeight: '600',
+    color: '#6b7280',
+    textAlign: 'center',
   },
   image: {
     width: 120,
     height: 120,
     borderRadius: 60,
   },
-  pickerContainer: {
-    borderWidth: 1,
-    borderColor: '#cbd5e1',
-    borderRadius: 10,
-    overflow: 'hidden',
+  senhaContainer: {
+    flexDirection: 'row',
     backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 6,
+    paddingHorizontal: 10,
+    alignItems: 'center',
+  },
+  senhaInput: {
+    flex: 1,
+    paddingVertical: 10,
+    fontSize: 16,
+  },
+  botao: {
+    marginTop: 30,
+    backgroundColor: '#2563eb',
+    borderRadius: 6,
+    padding: 15,
+    alignItems: 'center',
+  },
+  botaoTexto: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 18,
   },
 });

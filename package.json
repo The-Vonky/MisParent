@@ -12,6 +12,7 @@
   "dependencies": {
     "@react-native-async-storage/async-storage": "^1.24.0",
     "@react-native-community/checkbox": "^0.5.17",
+    "@react-native-community/datetimepicker": "8.2.0",
     "@react-native-picker/picker": "^2.11.0",
     "@react-navigation/native": "^7.1.6",
     "@react-navigation/native-stack": "^7.3.10",
@@ -19,6 +20,7 @@
     "dayjs": "^1.11.13",
     "expo": "~52.0.46",
     "expo-blur": "~14.0.3",
+    "expo-datepicker": "^1.0.23",
     "expo-image-picker": "~16.0.6",
     "expo-status-bar": "~2.0.1",
     "firebase": "^11.6.0",
@@ -27,6 +29,7 @@
     "react-native": "0.76.9",
     "react-native-calendars": "^1.1311.0",
     "react-native-gesture-handler": "^2.25.0",
+    "react-native-modal-datetime-picker": "^18.0.0",
     "react-native-reanimated": "^3.17.5",
     "react-native-safe-area-context": "4.12.0",
     "react-native-screens": "~4.4.0",
