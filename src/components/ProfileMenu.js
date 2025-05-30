@@ -90,23 +90,23 @@ const ProfileMenu = ({ visible, onClose, user }) => {
             </View>
           </View>
 
-          <View style={styles.divider} />
-          <MenuItem icon="person" label="Gerenciar Usuário" />
-          <View style={styles.divider} />
-          <MenuItem icon="calendar" label="Grade de Horários" />
-          <View style={styles.divider} />
-          <MenuItem icon="list" label="Atividades e Tarefas" />
-          <View style={styles.divider} />
-          <MenuItem icon="checkbox" label="Frequência" />
-          <View style={styles.divider} />
-          <MenuItem icon="school" label="Materiais do Aluno" />
-          <View style={styles.divider} />
-          <MenuItem icon="book" label="Plano de Aula" />
-          <View style={styles.divider} />
-          <MenuItem icon="business" label="Secretaria" />
-          <View style={styles.divider} />
-          <MenuItem icon="settings" label="Configurações" />
-          <View style={styles.divider} />
+        <View style={styles.divider} />
+        <MenuItem icon="person" label="Gerenciar Usuário" />
+        <View style={styles.divider} />
+        <MenuItem icon="calendar" label="Grade de Horários" />
+        <View style={styles.divider} />
+        <MenuItem icon="list" label="Atividades e Tarefas" />
+        <View style={styles.divider} />
+        <MenuItem icon="checkbox" label="Frequência" />
+        <View style={styles.divider} />
+        <MenuItem icon="school" label="Materiais do Aluno" />
+        <View style={styles.divider} />
+        <MenuItem icon="book" label="Plano de Aula" onPress={() => navigation.navigate('PlanoDeAula')} />
+        <View style={styles.divider} />
+        <MenuItem icon="business" label="Secretaria" />
+        <View style={styles.divider} />
+        <MenuItem icon="settings" label="Configurações" />
+        <View style={styles.divider} />
 
           <View style={{ flex: 1 }} />
           <View style={styles.divider} />
