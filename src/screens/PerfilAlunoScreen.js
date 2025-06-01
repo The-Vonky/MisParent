@@ -1,45 +1,91 @@
-import React from 'react';
-import { View, Text, StyleSheet, Image, ScrollView } from 'react-native';
-import { FontAwesome5 } from '@expo/vector-icons'; // ou 'react-native-vector-icons/FontAwesome5'
+import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
+import { firestore } from '../config/firebaseConfig';
+import { collection, addDoc, Timestamp } from 'firebase/firestore';
 
-export default function PerfilAlunoScreen() {
+export default function AdminGradeScreen({ navigation }) {
+  const [materia, setMateria] = useState('');
+  const [inicio, setInicio] = useState('');
+  const [fim, setFim] = useState('');
+  const [professor, setProfessor] = useState('');
+  const [sala, setSala] = useState('');
+  const [conteudo, setConteudo] = useState('');
+
+  const handleSalvar = async () => {
+    if (!materia || !inicio || !fim || !professor || !sala || !conteudo) {
+      Alert.alert('Erro', 'Por favor, preencha todos os campos.');
+      return;
+    }
+
+    try {
+      await addDoc(collection(firestore, 'GradeHorarios'), {
+        materia,
+        inicio,
+        fim,
+        professor,
+        sala,
+        conteudo,
+        dataCriacao: Timestamp.now(),
+      });
+
+      Alert.alert('Sucesso', 'Horário cadastrado com sucesso!');
+      setMateria('');
+      setInicio('');
+      setFim('');
+      setProfessor('');
+      setSala('');
+      setConteudo('');
+      navigation.goBack();
+    } catch (err) {
+      console.error(err);
+      Alert.alert('Erro', 'Não foi possível salvar o horário.');
+    }
+  };
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {/* Cartão do Aluno */}
-      <View style={styles.card}>
-        <View style={styles.headerRow}>
-          <Image
-            source={{ uri: 'https://i.imgur.com/bPzB2rS.png' }}
-            style={styles.profileImage}
-          />
-          <View style={styles.infoContainer}>
-            <ProfileItem label="Matrícula" value="00000001" />
-            <ProfileItem label="Nome" value="Mordecai" />
-            <ProfileItem label="Nascimento" value="07/07/1987" />
-            <ProfileItem label="Escola" value="Mind International School - MIS" />
-            <ProfileItem label="Observações" value="Gaio Azul" />
-          </View>
-        </View>
-        <View style={styles.misLogoContainer}>
-          <Text style={styles.misLogo}>MIS</Text>
-        </View>
-      </View>
+      <Text style={styles.title}>Cadastrar Horário</Text>
 
-      {/* Resumo de Tarefas */}
-      <View style={styles.taskRow}>
-        <TaskCard
-          color="#4CAF50"
-          icon="check-circle"
-          title="Deveres feitos"
-          count={12}
-        />
-        <TaskCard
-          color="#F44336"
-          icon="exclamation-circle"
-          title="A fazer"
-          count={2}
-        />
-      </View>
+      <TextInput
+        placeholder="Matéria"
+        style={styles.input}
+        value={materia}
+        onChangeText={setMateria}
+      />
+      <TextInput
+        placeholder="Horário de Início (ex: 08:00)"
+        style={styles.input}
+        value={inicio}
+        onChangeText={setInicio}
+      />
+      <TextInput
+        placeholder="Horário de Término (ex: 09:00)"
+        style={styles.input}
+        value={fim}
+        onChangeText={setFim}
+      />
+      <TextInput
+        placeholder="Nome do Professor"
+        style={styles.input}
+        value={professor}
+        onChangeText={setProfessor}
+      />
+      <TextInput
+        placeholder="Sala"
+        style={styles.input}
+        value={sala}
+        onChangeText={setSala}
+      />
+      <TextInput
+        placeholder="Conteúdo"
+        style={styles.input}
+        value={conteudo}
+        onChangeText={setConteudo}
+        multiline
+      />
+
+      <TouchableOpacity style={styles.button} onPress={handleSalvar}>
+        <Text style={styles.buttonText}>Salvar Horário</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 }
@@ -62,73 +108,33 @@ const TaskCard = ({ color, icon, title, count }) => (
 const styles = StyleSheet.create({
   container: {
     padding: 20,
-    backgroundColor: '#F4F6FA',
+    backgroundColor: '#fff',
     flexGrow: 1,
-    alignItems: 'center',
   },
-  card: {
-    backgroundColor: '#FFA726',
-    borderRadius: 16,
-    padding: 20,
-    width: '100%',
-    elevation: 4,
-    marginBottom: 20,
-  },
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  profileImage: {
-    width: 90,
-    height: 90,
-    borderRadius: 12,
-    marginRight: 15,
-    borderWidth: 2,
-    borderColor: '#FFF',
-  },
-  infoContainer: {
-    flex: 1,
-  },
-  label: {
-    fontWeight: '600',
-    marginBottom: 5,
-    color: '#333',
-    fontSize: 14,
-  },
-  value: {
-    fontWeight: '400',
-    color: '#111',
-  },
-  misLogoContainer: {
-    marginTop: 12,
-    alignItems: 'flex-end',
-  },
-  misLogo: {
+  title: {
+    fontSize: 24,
     fontWeight: 'bold',
-    fontSize: 22,
-    color: '#003366',
+    marginBottom: 20,
+    alignSelf: 'center',
+    color: '#00008B',
   },
-  taskRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-    gap: 15,
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 15,
+    backgroundColor: '#f9f9f9',
   },
-  taskCard: {
-    flex: 1,
-    borderRadius: 16,
-    padding: 20,
+  button: {
+    backgroundColor: '#00008B',
+    padding: 15,
+    borderRadius: 10,
     alignItems: 'center',
+    marginTop: 10,
   },
-  taskText: {
-    color: '#FFF',
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-  taskNumber: {
-    color: '#FFF',
-    fontSize: 32,
+  buttonText: {
+    color: '#fff',
     fontWeight: 'bold',
   },
 });
