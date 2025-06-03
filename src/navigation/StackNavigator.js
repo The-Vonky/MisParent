@@ -9,6 +9,7 @@ import CadastrarAlunoScreen from '../screens/CadastrarAlunoScreen';
 import SettingsScreen from '../screens/SettingsScreens';
 import RelatorioDiarioScreen from '../screens/RelatorioDiario';
 import PerfilAlunoScreen from '../screens/PerfilAlunoScreen';
+import PlanoAulaScreen from '../screens/PlanoAulaScreen.js';
 
 const Stack = createNativeStackNavigator();
 
@@ -43,7 +44,7 @@ export default function StackNavigator() {
         <Stack.Screen
           name="RelatorioDiario"
           component={RelatorioDiarioScreen}
-          options={{ headerShown: false}}
+          options={{ headerShown: false }}
         />
 
         <Stack.Screen
@@ -67,7 +68,13 @@ export default function StackNavigator() {
         <Stack.Screen
           name="PerfilAluno"
           component={PerfilAlunoScreen}
-          options={{headerShown: false}}
+          options={{ headerShown: false }}
+        />
+
+        <Stack.Screen
+          name="PlanoAula"
+          component={PlanoAulaScreen}
+          options={{ headerShown: false }}
         />
 
       </Stack.Navigator>

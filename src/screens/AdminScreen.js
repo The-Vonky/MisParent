@@ -15,7 +15,7 @@ export default function AdminScreen({ navigation }) {
         <Card
           title="Grade de horários"
           icon="calendar"
-          onPress={() => navigation.navigate('PerfilAluno')}
+          onPress={() => navigation.navigate('PlanoAula')}
         />
         <Card
           title="Relatório diário"
