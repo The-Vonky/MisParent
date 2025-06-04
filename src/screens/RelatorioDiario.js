@@ -168,12 +168,13 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: '#1e3a8a',
-    paddingVertical: 24,
+    paddingVertical: 20,
     alignItems: 'center',
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
   },
   headerText: {
+    paddingTop: 20,
     color: '#fff',
     fontSize: 20,
     fontWeight: 'bold',

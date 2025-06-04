@@ -13,9 +13,9 @@ export default function AdminScreen({ navigation }) {
       {/* Conteúdo principal */}
       <ScrollView contentContainerStyle={styles.content}>
         <Card
-          title="Grade de horários"
+          title="Plano de Aula"
           icon="calendar"
-          onPress={() => navigation.navigate('PerfilAluno')}
+          onPress={() => navigation.navigate('PlanoAula')}
         />
         <Card
           title="Relatório diário"

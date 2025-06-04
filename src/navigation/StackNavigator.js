@@ -45,7 +45,7 @@ export default function StackNavigator() {
         <Stack.Screen
           name="RelatorioDiario"
           component={RelatorioDiarioScreen}
-          options={{ headerShown: false}}
+          options={{ headerShown: false }}
         />
 
         <Stack.Screen
@@ -69,7 +69,13 @@ export default function StackNavigator() {
         <Stack.Screen
           name="PerfilAluno"
           component={PerfilAlunoScreen}
-          options={{headerShown: false}}
+          options={{ headerShown: false }}
+        />
+
+        <Stack.Screen
+          name="PlanoAula"
+          component={PlanoAulaScreen}
+          options={{ headerShown: false }}
         />
 
         <Stack.Screen
