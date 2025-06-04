@@ -1,4 +1,3 @@
-// src/screens/AdminGradeScreen.js
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
 import { firestore } from '../config/firebaseConfig';
@@ -42,7 +41,6 @@ export default function AdminGradeScreen({ navigation }) {
       Alert.alert('Erro', 'Não foi possível salvar o horário.');
     }
   };
-
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Cadastrar Horário</Text>
@@ -91,6 +89,21 @@ export default function AdminGradeScreen({ navigation }) {
     </ScrollView>
   );
 }
+
+// COMPONENTES INTERNOS
+const ProfileItem = ({ label, value }) => (
+  <Text style={styles.label}>
+    {label}: <Text style={styles.value}>{value}</Text>
+  </Text>
+);
+
+const TaskCard = ({ color, icon, title, count }) => (
+  <View style={[styles.taskCard, { backgroundColor: color }]}>
+    <FontAwesome5 name={icon} size={24} color="#FFF" style={{ marginBottom: 10 }} />
+    <Text style={styles.taskText}>{title}</Text>
+    <Text style={styles.taskNumber}>{count}</Text>
+  </View>
+);
 
 const styles = StyleSheet.create({
   container: {

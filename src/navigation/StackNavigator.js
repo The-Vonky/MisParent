@@ -9,14 +9,15 @@ import CadastrarAlunoScreen from '../screens/CadastrarAlunoScreen';
 import SettingsScreen from '../screens/SettingsScreens';
 import RelatorioDiarioScreen from '../screens/RelatorioDiario';
 import PerfilAlunoScreen from '../screens/PerfilAlunoScreen';
-import PlanoAulaScreen from '../screens/PlanoAulaScreen.js';
+import PlanoDeAulaScreen from '../screens/PlanoDeAulaScreen';
+import PlanoDeAulaDetalhadoScreen from '../screens/PlanoDeAulaDetalhadoScreen';
 
 const Stack = createNativeStackNavigator();
 
 export default function StackNavigator() {
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <Stack.Navigator initialRouteName="Login">
+      <Stack.Navigator initialRouteName="Home">
         <Stack.Screen
           name="Login"
           component={LoginScreen}
@@ -77,6 +78,18 @@ export default function StackNavigator() {
           options={{ headerShown: false }}
         />
 
+        <Stack.Screen
+          name="PlanoDeAula"
+          component={PlanoDeAulaScreen}
+          options={{ headerShown: false }}
+        />
+
+        <Stack.Screen
+          name="PlanoDeAulaDetalhado"
+          component={PlanoDeAulaDetalhadoScreen}
+          options={{ headerShown: false }}
+        />
+        
       </Stack.Navigator>
     </SafeAreaView>
   );
