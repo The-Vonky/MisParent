@@ -9,6 +9,7 @@ import CadastrarAlunoScreen from '../screens/CadastrarAlunoScreen';
 import SettingsScreen from '../screens/SettingsScreens';
 import RelatorioDiarioScreen from '../screens/RelatorioDiario';
 import PerfilAlunoScreen from '../screens/PerfilAlunoScreen';
+import PlanoAulaScreen from '../screens/PlanoAulaScreen';
 import PlanoDeAulaScreen from '../screens/PlanoDeAulaScreen';
 import PlanoDeAulaDetalhadoScreen from '../screens/PlanoDeAulaDetalhadoScreen';
 
@@ -17,7 +18,7 @@ const Stack = createNativeStackNavigator();
 export default function StackNavigator() {
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <Stack.Navigator initialRouteName="Home">
+      <Stack.Navigator initialRouteName="Login">
         <Stack.Screen
           name="Login"
           component={LoginScreen}
