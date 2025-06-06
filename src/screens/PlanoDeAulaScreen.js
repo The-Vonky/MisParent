@@ -10,6 +10,8 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import Feather from 'react-native-vector-icons/Feather';
 import { useNavigation } from '@react-navigation/native';
 import { TouchableOpacity } from 'react-native';
+import { ImageBackground, Dimensions } from 'react-native';
+
 
 
 const escolhas = {
@@ -22,6 +24,9 @@ const escolhas = {
   ],
 };
 
+
+const { width, height } = Dimensions.get('window');
+
 const PlanoDeAulaScreen = () => {
   const [menuVisible, setMenuVisible] = useState(false);
   const [notificationsVisible, setNotificationsVisible] = useState(false);
@@ -33,9 +38,16 @@ const PlanoDeAulaScreen = () => {
   const handleNotificationPress = () => setNotificationsVisible(true);
   const handleMessagePress = () => setMessagesVisible(true);
   
-  return( 
 
+  
+  return( 
+    
     <SafeAreaView style={styles.container}>
+      <ImageBackground
+      source={require('../../assets/backgroundMis.png')}
+      style={{ flex: 1}}
+      resizeMode="cover"
+    >
         <Header
           onProfilePress={handleProfilePress}
           onNotificationPress={handleNotificationPress}
@@ -47,7 +59,7 @@ const PlanoDeAulaScreen = () => {
         <MessagesModal visible={messagesVisible} onClose={() => setMessagesVisible(false)} />
 
     <View style={styles.body}>
-
+    
       <View style={styles.box}>
         <Feather name="log-out" size={30} color="#FF0000" onPress={() => navigation.navigate('Home')} />
         <Text style={styles.text}>Plano de Aula</Text>
@@ -60,22 +72,23 @@ const PlanoDeAulaScreen = () => {
         >
         <View style={styles.box2}>
           <Text style={styles.text}>{item.materia}</Text>
-          <Ionicons name="chevron-forward" size={20} />
+          <Ionicons name="chevron-forward" size={20} color={'#fff'} />
         </View>
       </TouchableOpacity>
       ))}
 
 
     </View>
-
+    </ImageBackground>
     </SafeAreaView>
+  
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+
   },
   content: {
     paddingBottom: 24,
@@ -91,22 +104,21 @@ const styles = StyleSheet.create({
   body: {
     flex: 1,
     alignItems: 'center',
-    backgroundColor: '#FFF',
     gap: 40,
   },
 
   box: {
-    width: '70%',
+    width: '85%',
     flexDirection: 'row',
     height: 50,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: 'rgba(248, 250, 252, 0.14)',
     marginTop: 20,
     borderWidth: 1,
     borderColor: '#CBD5E1',
     borderRadius: 10,
     borderStyle: 'solid',
     alignItems: 'center',
-    justifyContent: 'space-evenly',
+    justifyContent: 'space-around',
   },
 
   box2: {
@@ -116,8 +128,7 @@ const styles = StyleSheet.create({
     paddingRight: 10,
     width: '85%',
     height: 55,
-    backgroundColor: '#F8FAFC',
-
+    backgroundColor: 'rgba(248, 250, 252, 0.14)',
     borderWidth: 1,
     borderColor: '#CBD5E1',
     borderRadius: 10,
@@ -127,9 +138,11 @@ const styles = StyleSheet.create({
   },
 
   text: {
-    color: '#000',
+    color: '#fff',
+    fontWeight: 'bold',
+    fontFamily: '',
     fontSize: 20,
-    marginRight: 30,
+    marginRight: 70,
   },
 
 })

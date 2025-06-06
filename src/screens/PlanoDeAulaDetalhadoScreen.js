@@ -10,11 +10,12 @@ import { useNavigation } from '@react-navigation/native';
 import React, { useState, useRef } from 'react';
 import { Animated, TouchableOpacity, View, Text, StyleSheet } from 'react-native';
 import { Dimensions } from 'react-native';
+import { ImageBackground } from 'react-native';
 
 const screenWidth = Dimensions.get('window').width;
 const boxWidth = screenWidth * 0.9; // 90% da largura da tela
 
-
+const { width, height } = Dimensions.get('window');
 
 const PlanoDeAulaDetalhadoScreen = ({ route }) => {
 
@@ -94,7 +95,11 @@ const PlanoDeAulaDetalhadoScreen = ({ route }) => {
     return (
 
         <SafeAreaView style={styles.container}>
-
+        <ImageBackground
+            source={require('../../assets/backgroundMis.png')}
+            style={{ flex: 1}}
+            resizeMode="cover"
+        >
             <Header
                 onProfilePress={handleProfilePress}
                 onNotificationPress={handleNotificationPress}
@@ -118,7 +123,7 @@ const PlanoDeAulaDetalhadoScreen = ({ route }) => {
                         <View style={styles.headerRow}>
                             <Text style={styles.title}>Apresentação</Text>
                             <Animated.View style={{ transform: [{ rotate }] }}>
-                                <Ionicons name="chevron-down" size={24} color="#1E3A8A" />
+                                <Ionicons name="chevron-down" size={24} color="#fff" />
                             </Animated.View>
                         </View>
                         <Text style={styles.text}>Data: {horarios[materia] || 'Horário não disponível'}</Text>
@@ -144,6 +149,7 @@ const PlanoDeAulaDetalhadoScreen = ({ route }) => {
                 </TouchableOpacity>
                 
             </View>
+        </ImageBackground>
         </SafeAreaView>
     );
 };
@@ -170,7 +176,6 @@ const styles = StyleSheet.create({
     body: {
         flex: 1,
         alignItems: 'center',
-        backgroundColor: '#FFF',
     },
 
     box: {
@@ -178,7 +183,7 @@ const styles = StyleSheet.create({
         gap: 10,
         width: '90%',
         height: 60,
-        backgroundColor: '#F8FAFC',
+        backgroundColor: 'rgba(248, 250, 252, 0.14)',
         marginTop: 20,
         borderWidth: 1,
         borderColor: '#CBD5E1',
@@ -191,7 +196,7 @@ const styles = StyleSheet.create({
     box2: {
         width: boxWidth,
         paddingLeft: 10,
-        backgroundColor: '#F8FAFC',
+        backgroundColor: 'rgba(248, 250, 252, 0.14)',
         marginTop: 20,
         borderWidth: 1,
         borderColor: '#CBD5E1',
@@ -203,22 +208,25 @@ const styles = StyleSheet.create({
 
     title: {
         fontSize: 20,
+        fontWeight: 'bold',
+        color: '#fff',
     },
 
     materia: {
         fontSize: 20,
-        fontWeight: 'bold',
-        color: '#1E3A8A',
+        color: '#FF6600',
     },
 
     subtitle: {
         fontSize: 15,
         fontWeight: 'bold',
+        color: '#fff',
     },
 
     text: {
         fontSize: 16,
-        marginTop: 5,
+        marginBottom: 5,
+        color: '#fff',
     },
 
     text2: {
