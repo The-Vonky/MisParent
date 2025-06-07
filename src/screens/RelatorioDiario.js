@@ -34,7 +34,7 @@ export default function RelatorioDiarioScreen() {
   useEffect(() => {
     async function carregarAlunos() {
       try {
-        const querySnapshot = await getDocs(collection(firestore, 'alunos'));
+        const querySnapshot = await getDocs(collection(firestore, 'Alunos'));
         const alunos = [];
         querySnapshot.forEach((doc) => {
           alunos.push({ id: doc.id, ...doc.data() });

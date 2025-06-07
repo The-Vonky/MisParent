@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { firestore } from '../config/firebaseConfig';
 import { collection, addDoc, Timestamp } from 'firebase/firestore';
+import HeaderPadrao from '../components/HeaderPadrao';
 
 export default function PlanoDeAulaScreen({ navigation }) {
   const [nomeAula, setNomeAula] = useState('');
@@ -62,7 +63,7 @@ export default function PlanoDeAulaScreen({ navigation }) {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Plano de Aula</Text>
+      <HeaderPadrao titulo="Plano de Aula" />
 
       <TextInput
         placeholder="Nome da aula"
