@@ -7,10 +7,11 @@ import {
   StyleSheet,
   ScrollView,
   Alert,
+  SafeAreaView,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { firestore } from '../config/firebaseConfig';
 import { collection, addDoc, Timestamp } from 'firebase/firestore';
-import HeaderPadrao from '../components/HeaderPadrao';
 
 export default function PlanoDeAulaScreen({ navigation }) {
   const [nomeAula, setNomeAula] = useState('');
@@ -25,15 +26,8 @@ export default function PlanoDeAulaScreen({ navigation }) {
 
   const handleSalvar = async () => {
     if (
-      !nomeAula ||
-      !materia ||
-      !professor ||
-      !turma ||
-      !conteudo ||
-      !objetivos ||
-      !metodos ||
-      !recursos ||
-      !avaliacao
+      !nomeAula || !materia || !professor || !turma ||
+      !conteudo || !objetivos || !metodos || !recursos || !avaliacao
     ) {
       Alert.alert('Erro', 'Por favor, preencha todos os campos.');
       return;
@@ -62,88 +56,113 @@ export default function PlanoDeAulaScreen({ navigation }) {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <HeaderPadrao titulo="Plano de Aula" />
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.header}>
+        <View style={styles.headerRow}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Ionicons name="arrow-back" size={24} color="#fff" />
+          </TouchableOpacity>
+          <Text style={styles.headerText}>Plano de Aula</Text>
+          <View style={{ width: 24 }} /> {/* espaço pra equilibrar */}
+        </View>
+      </View>
 
-      <TextInput
-        placeholder="Nome da aula"
-        style={styles.input}
-        value={nomeAula}
-        onChangeText={setNomeAula}
-      />
-      <TextInput
-        placeholder="Matéria"
-        style={styles.input}
-        value={materia}
-        onChangeText={setMateria}
-      />
-      <TextInput
-        placeholder="Professor"
-        style={styles.input}
-        value={professor}
-        onChangeText={setProfessor}
-      />
-      <TextInput
-        placeholder="Turma"
-        style={styles.input}
-        value={turma}
-        onChangeText={setTurma}
-      />
-      <TextInput
-        placeholder="Conteúdo"
-        style={styles.textArea}
-        value={conteudo}
-        onChangeText={setConteudo}
-        multiline
-      />
-      <TextInput
-        placeholder="Objetivos"
-        style={styles.textArea}
-        value={objetivos}
-        onChangeText={setObjetivos}
-        multiline
-      />
-      <TextInput
-        placeholder="Métodos de ensino"
-        style={styles.textArea}
-        value={metodos}
-        onChangeText={setMetodos}
-        multiline
-      />
-      <TextInput
-        placeholder="Recursos"
-        style={styles.textArea}
-        value={recursos}
-        onChangeText={setRecursos}
-        multiline
-      />
-      <TextInput
-        placeholder="Avaliação"
-        style={styles.textArea}
-        value={avaliacao}
-        onChangeText={setAvaliacao}
-        multiline
-      />
+      <ScrollView contentContainerStyle={styles.container}>
+        <TextInput
+          placeholder="Nome da aula"
+          style={styles.input}
+          value={nomeAula}
+          onChangeText={setNomeAula}
+        />
+        <TextInput
+          placeholder="Matéria"
+          style={styles.input}
+          value={materia}
+          onChangeText={setMateria}
+        />
+        <TextInput
+          placeholder="Professor"
+          style={styles.input}
+          value={professor}
+          onChangeText={setProfessor}
+        />
+        <TextInput
+          placeholder="Turma"
+          style={styles.input}
+          value={turma}
+          onChangeText={setTurma}
+        />
+        <TextInput
+          placeholder="Conteúdo"
+          style={styles.textArea}
+          value={conteudo}
+          onChangeText={setConteudo}
+          multiline
+        />
+        <TextInput
+          placeholder="Objetivos"
+          style={styles.textArea}
+          value={objetivos}
+          onChangeText={setObjetivos}
+          multiline
+        />
+        <TextInput
+          placeholder="Métodos de ensino"
+          style={styles.textArea}
+          value={metodos}
+          onChangeText={setMetodos}
+          multiline
+        />
+        <TextInput
+          placeholder="Recursos"
+          style={styles.textArea}
+          value={recursos}
+          onChangeText={setRecursos}
+          multiline
+        />
+        <TextInput
+          placeholder="Avaliação"
+          style={styles.textArea}
+          value={avaliacao}
+          onChangeText={setAvaliacao}
+          multiline
+        />
 
-      <TouchableOpacity style={styles.button} onPress={handleSalvar}>
-        <Text style={styles.buttonText}>Salvar</Text>
-      </TouchableOpacity>
-    </ScrollView>
+        <TouchableOpacity style={styles.button} onPress={handleSalvar}>
+          <Text style={styles.buttonText}>Salvar</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#f4f6fa',
+  },
+  header: {
+    backgroundColor: '#1e3a8a',
+    paddingVertical: 20,
+    paddingHorizontal: 16,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 20,
+  },
+  headerText: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    flex: 1,
+  },
   container: {
     padding: 20,
-    backgroundColor: '#fff',
-    flexGrow: 1,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: '600',
-    alignSelf: 'center',
-    marginBottom: 20,
-    color: '#000',
   },
   input: {
     backgroundColor: '#f2f2f2',
@@ -160,14 +179,14 @@ const styles = StyleSheet.create({
     height: 100,
   },
   button: {
-    backgroundColor: '#E6F0FF',
+    backgroundColor: '#1e3a8a',
     padding: 15,
     borderRadius: 10,
     alignItems: 'center',
     marginTop: 10,
   },
   buttonText: {
-    color: '#000',
+    color: '#fff',
     fontWeight: '500',
     fontSize: 16,
   },
