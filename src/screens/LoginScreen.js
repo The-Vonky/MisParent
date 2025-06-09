@@ -8,8 +8,9 @@ import {
   Image,
   ImageBackground,
   ActivityIndicator,
+  SafeAreaView,
+  StatusBar,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth, firestore } from '../config/firebaseConfig';
 import { getDoc, doc } from 'firebase/firestore';
@@ -51,7 +52,8 @@ export default function LoginScreen({ navigation }) {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar backgroundColor="#000" barStyle="light-content" />
       <ImageBackground
         source={require('../../assets/Background-Login.png')}
         style={styles.background}
@@ -115,6 +117,10 @@ export default function LoginScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#000', // 👈 aqui deixa a SafeArea preta
+  },
   background: {
     flex: 1,
     justifyContent: 'center',

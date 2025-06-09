@@ -63,7 +63,7 @@ export default function AlertasScreen() {
 
 const styles = StyleSheet.create({
   header: {
-    paddingTop: 60,
+    paddingTop: 10,
     paddingBottom: 20,
     backgroundColor: '#1e3a8a',
     alignItems: 'center',

@@ -86,7 +86,7 @@ const ProfileMenu = ({ visible, onClose, user }) => {
 
             <View style={styles.infoContainer}>
               <Text style={styles.username}>{user?.name || 'Nome do Usuário'}</Text>
-              <Text style={styles.role}>{user?.role || 'Tipo do Usuário'}</Text>
+              <Text style={styles.role}>{user?.role || 'Trocar de Usuário'}</Text>
             </View>
           </View>
 

@@ -1,9 +1,12 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, StatusBar } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 
 export default function AdminScreen({ navigation }) {
   return (
     <View style={styles.container}>
+      {/* Corrige a barra de status */}
+      <StatusBar backgroundColor="#1e3a8a" barStyle="light-content" />
+
       {/* Cabeçalho */}
       <View style={styles.header}>
         <Text style={styles.headerText}>Painel do Administrador</Text>
@@ -61,7 +64,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f4f6fa',
   },
   header: {
-    paddingTop: 60,
+    paddingTop: 10,
     paddingBottom: 20,
     backgroundColor: '#1e3a8a',
     alignItems: 'center',

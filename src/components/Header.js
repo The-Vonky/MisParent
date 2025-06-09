@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
-import { Bell, BetweenHorizonalEnd, MessageSquare } from 'lucide-react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity, StatusBar } from 'react-native';
+import { Bell, MessageSquare } from 'lucide-react-native';
 import NotificationModal from '../components/NotificationModal';
 import MessageModal from '../components/MessagesModal';
 
@@ -26,6 +26,9 @@ const Header = ({ userName = 'Gandalf', onProfilePress }) => {
 
   return (
     <View style={styles.header}>
+      {/* Barra de status azul escura com texto claro */}
+      <StatusBar backgroundColor="#1e3a8a" barStyle="light-content" />
+
       <View style={styles.left}>
         <TouchableOpacity onPress={onProfilePress}>
           <Image
@@ -41,7 +44,7 @@ const Header = ({ userName = 'Gandalf', onProfilePress }) => {
         <TouchableOpacity style={styles.icon} onPress={openNotifications}>
           <Bell color="#fff" size={20} />
         </TouchableOpacity>
-        
+
         <TouchableOpacity style={styles.icon} onPress={openMessages}>
           <MessageSquare color="#fff" size={20} />
         </TouchableOpacity>
@@ -52,7 +55,6 @@ const Header = ({ userName = 'Gandalf', onProfilePress }) => {
         />
       </View>
 
-      {/* Aqui estão os modais */}
       <NotificationModal visible={isNotificationVisible} onClose={closeNotifications} />
       <MessageModal visible={isMessageVisible} onClose={closeMessages} />
     </View>
@@ -63,7 +65,7 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: '#1e3a8a',
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 10,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
