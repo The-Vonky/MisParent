@@ -52,13 +52,13 @@ const ScheduleList = ({ date }) => {
       setExpandedItem(id);
       Animated.parallel([
         Animated.timing(heights[id], {
-          toValue: 100,
-          duration: 300,
+          toValue: 60,
+          duration: 280,
           useNativeDriver: false,
         }),
         Animated.timing(opacity[id], {
           toValue: 1,
-          duration: 300,
+          duration: 280,
           useNativeDriver: false,
         }),
       ]).start();
@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
     paddingTop: 8,
   },
   detailText: {
-    fontSize: 13,
+    fontSize: 14,
     color: '#475569',
   },
 });

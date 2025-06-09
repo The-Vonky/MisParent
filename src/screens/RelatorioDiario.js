@@ -167,14 +167,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#f4f6fa',
   },
   header: {
+    paddingTop: 10,
+    paddingBottom: 20,
     backgroundColor: '#1e3a8a',
-    paddingVertical: 20,
     alignItems: 'center',
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
   },
   headerText: {
-    paddingTop: 20,
     color: '#fff',
     fontSize: 20,
     fontWeight: 'bold',

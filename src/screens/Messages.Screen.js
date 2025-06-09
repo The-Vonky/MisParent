@@ -6,8 +6,7 @@ import {
   FlatList,
   TouchableOpacity,
   StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
+  StatusBar,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import {
@@ -17,8 +16,6 @@ import {
   getDocs,
   onSnapshot,
   addDoc,
-  doc,
-  setDoc,
 } from 'firebase/firestore';
 import { auth, firestore } from '../config/firebaseConfig';
 
@@ -29,7 +26,6 @@ export default function MessagesScreen() {
   const [searchResults, setSearchResults] = useState([]);
   const [recentConversations, setRecentConversations] = useState([]);
 
-  // Buscar usuários pelo nome digitado
   const handleSearch = async (text) => {
     setSearch(text);
     if (text.length === 0) {
@@ -49,7 +45,6 @@ export default function MessagesScreen() {
     setSearchResults(results);
   };
 
-  // Buscar conversas recentes do usuário
   useEffect(() => {
     const q = query(
       collection(firestore, 'conversations'),
@@ -67,7 +62,6 @@ export default function MessagesScreen() {
     return unsubscribe;
   }, []);
 
-  // Iniciar ou abrir conversa existente
   const openConversation = async (targetUser) => {
     const convQuery = query(
       collection(firestore, 'conversations'),
@@ -100,6 +94,15 @@ export default function MessagesScreen() {
 
   return (
     <View style={styles.container}>
+      {/* StatusBar com background azul e texto claro */}
+      <StatusBar backgroundColor="#1e3a8a" barStyle="light-content" />
+
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.headerText}>Mensagens</Text>
+      </View>
+
+      {/* Campo de pesquisa */}
       <TextInput
         placeholder="Pesquisar usuário..."
         value={search}
@@ -127,7 +130,9 @@ export default function MessagesScreen() {
             data={recentConversations}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => {
-              const otherUserId = item.participants.find((uid) => uid !== currentUser.uid);
+              const otherUserId = item.participants.find(
+                (uid) => uid !== currentUser.uid
+              );
               return (
                 <TouchableOpacity
                   style={styles.userItem}
@@ -135,7 +140,9 @@ export default function MessagesScreen() {
                     openConversation({ id: otherUserId, nome: 'Usuário' /* Substituir com nome real */ })
                   }
                 >
-                  <Text style={styles.userName}>Conversa com {otherUserId}</Text>
+                  <Text style={styles.userName}>
+                    Conversa com {otherUserId}
+                  </Text>
                 </TouchableOpacity>
               );
             }}
@@ -149,9 +156,20 @@ export default function MessagesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 50,
-    paddingHorizontal: 20,
     backgroundColor: '#f4f6fa',
+  },
+  header: {
+    paddingTop: 10,
+    paddingBottom: 20,
+    backgroundColor: '#1e3a8a',
+    alignItems: 'center',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+  },
+  headerText: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
   },
   searchInput: {
     borderWidth: 1,
@@ -159,12 +177,13 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 12,
     backgroundColor: '#fff',
-    marginBottom: 10,
+    margin: 20,
   },
   sectionTitle: {
     fontSize: 16,
     fontWeight: 'bold',
     marginVertical: 10,
+    marginLeft: 20,
     color: '#1e3a8a',
   },
   userItem: {
@@ -172,6 +191,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 10,
     marginVertical: 6,
+    marginHorizontal: 20,
     borderWidth: 1,
     borderColor: '#e5e7eb',
   },

@@ -7,9 +7,8 @@ import {
   StyleSheet,
   ScrollView,
   Alert,
-  SafeAreaView,
+  StatusBar,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { firestore } from '../config/firebaseConfig';
 import { collection, addDoc, Timestamp } from 'firebase/firestore';
 
@@ -26,8 +25,15 @@ export default function PlanoDeAulaScreen({ navigation }) {
 
   const handleSalvar = async () => {
     if (
-      !nomeAula || !materia || !professor || !turma ||
-      !conteudo || !objetivos || !metodos || !recursos || !avaliacao
+      !nomeAula ||
+      !materia ||
+      !professor ||
+      !turma ||
+      !conteudo ||
+      !objetivos ||
+      !metodos ||
+      !recursos ||
+      !avaliacao
     ) {
       Alert.alert('Erro', 'Por favor, preencha todos os campos.');
       return;
@@ -56,15 +62,11 @@ export default function PlanoDeAulaScreen({ navigation }) {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <View style={styles.wrapper}>
+      <StatusBar backgroundColor="#1e3a8a" barStyle="light-content" />
+
       <View style={styles.header}>
-        <View style={styles.headerRow}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back" size={24} color="#fff" />
-          </TouchableOpacity>
-          <Text style={styles.headerText}>Plano de Aula</Text>
-          <View style={{ width: 24 }} /> {/* espaço pra equilibrar */}
-        </View>
+        <Text style={styles.headerText}>Plano de Aula</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.container}>
@@ -132,37 +134,31 @@ export default function PlanoDeAulaScreen({ navigation }) {
           <Text style={styles.buttonText}>Salvar</Text>
         </TouchableOpacity>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
+  wrapper: {
     flex: 1,
-    backgroundColor: '#f4f6fa',
+    backgroundColor: '#fff',
   },
   header: {
+    paddingTop: 10,
+    paddingBottom: 20,
     backgroundColor: '#1e3a8a',
-    paddingVertical: 20,
-    paddingHorizontal: 16,
+    alignItems: 'center',
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
-  },
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: 20,
   },
   headerText: {
     color: '#fff',
     fontSize: 20,
     fontWeight: 'bold',
-    textAlign: 'center',
-    flex: 1,
   },
   container: {
     padding: 20,
+    flexGrow: 1,
   },
   input: {
     backgroundColor: '#f2f2f2',
@@ -187,7 +183,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: '#fff',
-    fontWeight: '500',
+    fontWeight: '600',
     fontSize: 16,
   },
 });

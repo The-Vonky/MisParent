@@ -1,4 +1,3 @@
-// imports...
 import { useState, useEffect } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
@@ -299,15 +298,22 @@ export default function CadastrarAlunoScreen() {
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f4f6fa',
+  },
   header: {
-    backgroundColor: '#2563eb',
-    padding: 15,
+    paddingTop: 10,
+    paddingBottom: 20,
+    backgroundColor: '#1e3a8a',
+    alignItems: 'center',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
   },
   headerText: {
     color: '#fff',
     fontSize: 20,
     fontWeight: 'bold',
-    textAlign: 'center',
   },
   container: {
     padding: 15,
