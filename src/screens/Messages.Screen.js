@@ -121,33 +121,56 @@ export default function MessagesScreen() {
   }, []);
 
   const openConversation = async (targetUser) => {
-    const convQuery = query(
-      collection(firestore, 'conversations'),
-      where('participants', 'in', [
-        [currentUser.uid, targetUser.id],
-        [targetUser.id, currentUser.uid],
-      ])
-    );
+    try {
+      console.log('Abrindo conversa com:', targetUser);
+      
+      // Buscar conversa existente
+      const convQuery = query(
+        collection(firestore, 'conversations'),
+        where('participants', 'array-contains', currentUser.uid)
+      );
 
-    const convSnapshot = await getDocs(convQuery);
+      const convSnapshot = await getDocs(convQuery);
+      let conversationId = null;
 
-    let conversationId;
+      // Verificar se já existe uma conversa entre os dois usuários
+      for (const doc of convSnapshot.docs) {
+        const data = doc.data();
+        if (data.participants.includes(targetUser.id)) {
+          conversationId = doc.id;
+          console.log('Conversa existente encontrada:', conversationId);
+          break;
+        }
+      }
 
-    if (!convSnapshot.empty) {
-      conversationId = convSnapshot.docs[0].id;
-    } else {
-      const newConv = await addDoc(collection(firestore, 'conversations'), {
-        participants: [currentUser.uid, targetUser.id],
-        createdAt: Date.now(),
+      // Se não existir, criar nova conversa
+      if (!conversationId) {
+        console.log('Criando nova conversa...');
+        const newConv = await addDoc(collection(firestore, 'conversations'), {
+          participants: [currentUser.uid, targetUser.id],
+          createdAt: Date.now(),
+          lastMessage: '',
+          lastMessageTime: Date.now(),
+        });
+        conversationId = newConv.id;
+        console.log('Nova conversa criada:', conversationId);
+      }
+
+      // Navegar para a tela de chat
+      console.log('Navegando para Chat com params:', {
+        conversationId,
+        recipientName: targetUser.nome,
+        recipientId: targetUser.id,
       });
-      conversationId = newConv.id;
-    }
 
-    navigation.navigate('Chat', {
-      conversationId,
-      recipientName: targetUser.nome,
-      recipientId: targetUser.id,
-    });
+      navigation.navigate('Chat', {
+        conversationId,
+        recipientName: targetUser.nome,
+        recipientId: targetUser.id,
+      });
+    } catch (error) {
+      console.error('Erro ao abrir conversa:', error);
+    }
   };
 
   const renderMessageItem = ({ item }) => (
