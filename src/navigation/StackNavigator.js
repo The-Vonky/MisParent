@@ -11,8 +11,8 @@ import PlanoAulaScreen from '../screens/PlanoAulaScreen';
 import PlanoDeAulaScreen from '../screens/PlanoDeAulaScreen';
 import PlanoDeAulaDetalhadoScreen from '../screens/PlanoDeAulaDetalhadoScreen';
 import PerfilAlunoScreen from '../screens/PerfilAlunoScreen';
-import MessagesScreen from './screens/MessagesScreen';
-import ChatScreen from './screens/ChatScreen';
+import MessagesScreen from '../screens/Messages.Screen';
+import ChatScreen from '../screens/ChatScreen'; // Removido o './' extra
 
 const Stack = createNativeStackNavigator();
 
@@ -23,10 +23,12 @@ export default function StackNavigator() {
           <Stack.Screen
             name="Messages"
             component={MessagesScreen}
+            options={{ headerShown: false }} // Adicionei isso para manter consistência
           />
           <Stack.Screen
             name="Chat"
             component={ChatScreen}
+            options={{ headerShown: false }} // Adicionei isso para manter consistência
           />
 
           <Stack.Screen
