@@ -82,14 +82,14 @@ export default function AdminDashboard() {
       title: 'Relatório Diário',
       icon: 'document-text-outline',
       color: '#fb923c',
-      screen: 'DailyReport'
+      screen: 'RelatorioDiario'
     },
     {
       id: 2,
       title: 'Cadastrar Aluno',
       icon: 'person-add-outline',
       color: '#10b981',
-      screen: 'RegisterStudent'
+      screen: 'CadastrarAluno'
     },
     {
       id: 3,
@@ -103,14 +103,14 @@ export default function AdminDashboard() {
       title: 'Plano de Aula',
       icon: 'book-outline',
       color: '#8b5cf6',
-      screen: 'LessonPlan'
+      screen: 'PlanoAula'
     },
     {
       id: 5,
       title: 'Alertas',
       icon: 'notifications-outline',
       color: '#ef4444',
-      screen: 'Alerts'
+      screen: 'Alertas'
     },
     {
       id: 6,
