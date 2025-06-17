@@ -13,22 +13,34 @@ import PlanoDeAulaDetalhadoScreen from '../screens/PlanoDeAulaDetalhadoScreen';
 import PerfilAlunoScreen from '../screens/PerfilAlunoScreen';
 import MessagesScreen from '../screens/Messages.Screen';
 import ChatScreen from '../screens/ChatScreen'; // Removido o './' extra
+import AcessarDiarioScreen from '../screens/AcessarDiarioScreen'; // Importando o novo componente
+import MaterialsScreen from '../screens/MaterialsScreen';
 
 const Stack = createNativeStackNavigator();
 
 export default function StackNavigator() {
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <Stack.Navigator initialRouteName="Login">
+      <Stack.Navigator initialRouteName="Home">
+          <Stack.Screen
+            name="AcessarDiario"
+            component={AcessarDiarioScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Materials"
+            component={MaterialsScreen}
+            options={{ headerShown: false }}
+          />
           <Stack.Screen
             name="Messages"
             component={MessagesScreen}
-            options={{ headerShown: false }} // Adicionei isso para manter consistência
+            options={{ headerShown: false }}
           />
           <Stack.Screen
             name="Chat"
             component={ChatScreen}
-            options={{ headerShown: false }} // Adicionei isso para manter consistência
+            options={{ headerShown: false }}
           />
 
           <Stack.Screen

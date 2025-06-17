@@ -10,7 +10,6 @@ import ProfileMenu from '../components/ProfileMenu';
 import MessagesModal from '../components/MessagesModal';
 import NotificationModal from '../components/NotificationModal';
 
-
 const HomeScreen = () => {
   const [selectedDate, setSelectedDate] = useState('2025-02-28');
   const [expandedItem, setExpandedItem] = useState(null);
@@ -23,40 +22,51 @@ const HomeScreen = () => {
   const handleMessagePress = () => setMessagesVisible(true);
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Header
-        onProfilePress={handleProfilePress}
-        onNotificationPress={handleNotificationPress}
-        onMessagePress={handleMessagePress}
+    <>
+      <SafeAreaView style={styles.container}>
+        <Header
+          onProfilePress={handleProfilePress}
+          onNotificationPress={handleNotificationPress}
+          onMessagePress={handleMessagePress}
+        />
+
+        <FlatList
+          data={[]}
+          ListHeaderComponent={
+            <View style={styles.content}>
+              <Calendar selectedDate={selectedDate} onDateChange={setSelectedDate} />
+              <Divider />
+              <ScheduleList
+                date={selectedDate}
+                expandedItem={expandedItem}
+                onToggleExpand={setExpandedItem}
+              />
+              <Divider />
+              <Announcement />
+              <Divider />
+            </View>
+          }
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={null}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        />
+      </SafeAreaView>
+
+      {/* Modais renderizados fora do SafeAreaView para evitar problemas de layout */}
+      <ProfileMenu 
+        visible={menuVisible} 
+        onClose={() => setMenuVisible(false)} 
       />
-
-      <ProfileMenu visible={menuVisible} onClose={() => setMenuVisible(false)} />
-      <NotificationModal visible={notificationsVisible} onClose={() => setNotificationsVisible(false)} />
-      <MessagesModal visible={messagesVisible} onClose={() => setMessagesVisible(false)} />
-
-      <FlatList
-        data={[]}
-        ListHeaderComponent={
-          <View style={styles.content}>
-            <Calendar selectedDate={selectedDate} onDateChange={setSelectedDate} />
-            <Divider />
-            <ScheduleList
-              date={selectedDate}
-              expandedItem={expandedItem}
-              onToggleExpand={setExpandedItem}
-            />
-            <Divider />
-            <Announcement />
-            <Divider />
-
-          </View>
-        }
-        keyExtractor={(item, index) => index.toString()}
-        renderItem={null}
-        showsVerticalScrollIndicator={false}
+      <NotificationModal 
+        visible={notificationsVisible} 
+        onClose={() => setNotificationsVisible(false)} 
       />
-
-    </SafeAreaView>
+      <MessagesModal 
+        visible={messagesVisible} 
+        onClose={() => setMessagesVisible(false)} 
+      />
+    </>
   );
 };
 
@@ -67,6 +77,9 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingBottom: 24,
+  },
+  scrollContent: {
+    flexGrow: 1,
   },
   noReport: {
     fontSize: 18,
