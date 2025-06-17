@@ -99,13 +99,13 @@ const ProfileMenu = ({ visible, onClose, user }) => {
         <View style={styles.divider} />
         <MenuItem icon="checkbox" label="Frequência" />
         <View style={styles.divider} />
-        <MenuItem icon="school" label="Materiais do Aluno" />
+        <MenuItem icon="school" label="Materiais do Aluno" onPress={() => navigation.navigate('Materials')}/>
         <View style={styles.divider} />
         <MenuItem icon="book" label="Plano de Aula" onPress={() => navigation.navigate('PlanoDeAula')} />
         <View style={styles.divider} />
         <MenuItem icon="business" label="Secretaria" />
         <View style={styles.divider} />
-        <MenuItem icon="settings" label="Configurações" />
+        <MenuItem icon="settings" label="Configurações" onPress={() => navigation.navigate('Settings')} />
         <View style={styles.divider} />
 
           <View style={{ flex: 1 }} />
