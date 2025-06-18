@@ -1,23 +1,22 @@
-import { useState, useCallback, useMemo } from 'react';
-import { 
-  View, 
-  Text, 
-  Image, 
-  TouchableOpacity, 
-  FlatList, 
-  StyleSheet, 
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
   ScrollView,
-  Dimensions,
-  RefreshControl,
+  SafeAreaView,
   StatusBar,
-  Alert
+  Alert,
+  FlatList,
+  Image,
+  RefreshControl,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 
-const { width } = Dimensions.get('window');
-
-export default function StudentProfile({ navigation, route }) {
+export default function StudentProfile({ route }) {
+  const navigation = useNavigation();
   const [refreshing, setRefreshing] = useState(false);
   const [selectedTab, setSelectedTab] = useState('eventos');
   const [loading, setLoading] = useState(false);
@@ -28,9 +27,9 @@ export default function StudentProfile({ navigation, route }) {
   // Enhanced mock data with error handling
   const studentData = useMemo(() => ({
     id: studentId || '1',
-    name: 'Lucas Oliveira',
-    class: '2A',
-    teacher: 'Ana Silva',
+    name: 'Mano Gandalf',
+    class: '2 - A',
+    teacher: 'Ana Carolina',
     modality: 'Integral',
     avatar: 'https://static1.srcdn.com/wordpress/wp-content/uploads/2017/07/Sir-Ian-McKellen-as-Gandalf-The-Grey-The-Shire-Lord-of-the-Rings-Peter-Jackson.jpg',
     stats: {
@@ -38,9 +37,8 @@ export default function StudentProfile({ navigation, route }) {
       grades: '8.5',
       activities: '12'
     },
-    // Add more student details
     phone: '+55 11 99999-9999',
-    email: 'lucas.oliveira@escola.com',
+    email: 'manoGandalf@escola.com',
     birthDate: '2010-05-15',
     address: 'Rua das Flores, 123 - São Paulo, SP'
   }), [studentId]);
@@ -49,7 +47,7 @@ export default function StudentProfile({ navigation, route }) {
     { 
       id: '1', 
       title: 'Reunião de Pais', 
-      date: '2025-06-20', // Updated to future date
+      date: '2025-06-20',
       time: '19:00',
       type: 'meeting',
       description: 'Reunião para discussão do desenvolvimento escolar',
@@ -58,7 +56,7 @@ export default function StudentProfile({ navigation, route }) {
     { 
       id: '2', 
       title: 'Feriado - Corpus Christi', 
-      date: '2025-06-19', // Updated to actual 2025 date
+      date: '2025-06-19',
       type: 'holiday',
       description: 'Não haverá aulas'
     },
@@ -129,29 +127,6 @@ export default function StudentProfile({ navigation, route }) {
     }
   }, []);
 
-  const handleBack = useCallback(() => {
-    navigation.goBack();
-  }, [navigation]);
-
-  const handleDiaryPress = useCallback(() => {
-    navigation.navigate('Diary', { 
-      studentId: studentData.id,
-      studentName: studentData.name 
-    });
-  }, [navigation, studentData]);
-
-  const handleTabPress = useCallback((tab) => {
-    setSelectedTab(tab);
-  }, []);
-
-  const handleEventPress = useCallback((event) => {
-    navigation.navigate('EventDetails', { eventId: event.id });
-  }, [navigation]);
-
-  const handleActivityPress = useCallback((activity) => {
-    navigation.navigate('ActivityDetails', { activityId: activity.id });
-  }, [navigation]);
-
   const handleContactPress = useCallback(() => {
     Alert.alert(
       'Contato',
@@ -164,42 +139,69 @@ export default function StudentProfile({ navigation, route }) {
     );
   }, [studentData]);
 
-  // Enhanced render functions
-  const renderEventItem = useCallback(({ item }) => {
-    const getEventIcon = (type) => {
-      switch (type) {
-        case 'meeting': return 'people-outline';
-        case 'holiday': return 'calendar-outline';
-        case 'event': return 'star-outline';
-        default: return 'calendar-outline';
-      }
-    };
+  const handleEventPress = useCallback((event) => {
+    navigation.navigate('EventDetails', { eventId: event.id });
+  }, [navigation]);
 
-    const getEventColor = (type) => {
-      switch (type) {
-        case 'meeting': return '#3b82f6';
-        case 'holiday': return '#ef4444';
-        case 'event': return '#10b981';
-        default: return '#6b7280';
-      }
-    };
+  const handleActivityPress = useCallback((activity) => {
+    navigation.navigate('ActivityDetails', { activityId: activity.id });
+  }, [navigation]);
 
-    const formatDate = (dateString) => {
-      const date = new Date(dateString);
-      const today = new Date();
-      const diffDays = Math.ceil((date - today) / (1000 * 60 * 60 * 24));
-      
-      if (diffDays === 0) return 'Hoje';
-      if (diffDays === 1) return 'Amanhã';
-      if (diffDays > 0 && diffDays <= 7) return `Em ${diffDays} dias`;
-      
-      return date.toLocaleDateString('pt-BR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
-      });
-    };
+  // Helper functions
+  const getEventIcon = (type) => {
+    switch (type) {
+      case 'meeting': return 'people-outline';
+      case 'holiday': return 'calendar-outline';
+      case 'event': return 'star-outline';
+      default: return 'calendar-outline';
+    }
+  };
 
+  const getEventColor = (type) => {
+    switch (type) {
+      case 'meeting': return '#1e3a8a';
+      case 'holiday': return '#ef4444';
+      case 'event': return '#10b981';
+      default: return '#6b7280';
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'completed': return '#10b981';
+      case 'pending': return '#f59e0b';
+      case 'in_progress': return '#1e3a8a';
+      default: return '#6b7280';
+    }
+  };
+
+  const getStatusText = (status) => {
+    switch (status) {
+      case 'completed': return 'Concluído';
+      case 'pending': return 'Pendente';
+      case 'in_progress': return 'Em Progresso';
+      default: return 'Indefinido';
+    }
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const today = new Date();
+    const diffDays = Math.ceil((date - today) / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) return 'Hoje';
+    if (diffDays === 1) return 'Amanhã';
+    if (diffDays > 0 && diffDays <= 7) return `Em ${diffDays} dias`;
+    
+    return date.toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  };
+
+  // Render functions
+  const renderEventItem = ({ item }) => {
     const isUpcoming = new Date(item.date) >= new Date();
 
     return (
@@ -208,48 +210,29 @@ export default function StudentProfile({ navigation, route }) {
         onPress={() => handleEventPress(item)}
       >
         <View style={[styles.eventIconContainer, { backgroundColor: getEventColor(item.type) + '20' }]}>
-          <Ionicons name={getEventIcon(item.type)} size={24} color={getEventColor(item.type)} />
+          <Ionicons name={getEventIcon(item.type)} size={20} color={getEventColor(item.type)} />
         </View>
         <View style={styles.eventContent}>
-          <Text style={styles.eventTitle}>{item.title}</Text>
-          <Text style={styles.eventDescription}>{item.description}</Text>
-          {item.location && (
-            <View style={styles.eventLocationContainer}>
-              <Ionicons name="location-outline" size={12} color="#9ca3af" />
-              <Text style={styles.eventLocation}>{item.location}</Text>
-            </View>
-          )}
-          <View style={styles.eventDateContainer}>
+          <View style={styles.eventHeader}>
+            <Text style={styles.eventTitle}>{item.title}</Text>
             <Text style={[styles.eventDate, !isUpcoming && styles.pastEventText]}>
               {formatDate(item.date)}
             </Text>
-            {item.time && <Text style={styles.eventTime}>{item.time}</Text>}
           </View>
+          <Text style={styles.eventDescription}>{item.description}</Text>
+          {item.location && (
+            <View style={styles.eventLocationContainer}>
+              <Ionicons name="location-outline" size={12} color="#6b7280" />
+              <Text style={styles.eventLocation}>{item.location}</Text>
+            </View>
+          )}
+          {item.time && <Text style={styles.eventTime}>Horário: {item.time}</Text>}
         </View>
-        <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
       </TouchableOpacity>
     );
-  }, [handleEventPress]);
+  };
 
-  const renderActivityItem = useCallback(({ item }) => {
-    const getStatusColor = (status) => {
-      switch (status) {
-        case 'completed': return '#10b981';
-        case 'pending': return '#f59e0b';
-        case 'in_progress': return '#3b82f6';
-        default: return '#6b7280';
-      }
-    };
-
-    const getStatusText = (status) => {
-      switch (status) {
-        case 'completed': return 'Concluído';
-        case 'pending': return 'Pendente';
-        case 'in_progress': return 'Em Progresso';
-        default: return 'Indefinido';
-      }
-    };
-
+  const renderActivityItem = ({ item }) => {
     const isOverdue = new Date(item.dueDate) < new Date() && item.status !== 'completed';
 
     return (
@@ -258,39 +241,39 @@ export default function StudentProfile({ navigation, route }) {
         onPress={() => handleActivityPress(item)}
       >
         <View style={styles.activityHeader}>
-          <Text style={styles.activitySubject}>{item.subject}</Text>
-          <View style={[
-            styles.statusBadge, 
-            { backgroundColor: getStatusColor(item.status) + '20' }
-          ]}>
-            <Text style={[
-              styles.statusText,
-              { color: getStatusColor(item.status) }
+          <View style={styles.activitySubjectContainer}>
+            <Text style={styles.activitySubject}>{item.subject}</Text>
+            <View style={[
+              styles.statusBadge, 
+              { backgroundColor: getStatusColor(item.status) + '20' }
             ]}>
-              {getStatusText(item.status)}
-            </Text>
+              <Text style={[
+                styles.statusText,
+                { color: getStatusColor(item.status) }
+              ]}>
+                {getStatusText(item.status)}
+              </Text>
+            </View>
           </View>
+          <Text style={styles.activityDate}>
+            {new Date(item.date).toLocaleDateString('pt-BR')}
+          </Text>
         </View>
         <Text style={styles.activityTitle}>{item.title}</Text>
         {item.description && (
           <Text style={styles.activityDescription}>{item.description}</Text>
         )}
         <View style={styles.activityFooter}>
-          <View>
-            <Text style={styles.activityDate}>
-              Criado: {new Date(item.date).toLocaleDateString('pt-BR')}
+          {item.dueDate && (
+            <Text style={[styles.activityDueDate, isOverdue && styles.overdueText]}>
+              Prazo: {new Date(item.dueDate).toLocaleDateString('pt-BR')}
             </Text>
-            {item.dueDate && (
-              <Text style={[styles.activityDueDate, isOverdue && styles.overdueText]}>
-                Prazo: {new Date(item.dueDate).toLocaleDateString('pt-BR')}
-              </Text>
-            )}
-          </View>
+          )}
           {item.grade && <Text style={styles.activityGrade}>Nota: {item.grade}</Text>}
         </View>
       </TouchableOpacity>
     );
-  }, [handleActivityPress]);
+  };
 
   const renderTabContent = () => {
     if (selectedTab === 'eventos') {
@@ -298,35 +281,41 @@ export default function StudentProfile({ navigation, route }) {
       const pastEvents = events.filter(event => new Date(event.date) < new Date());
       const sortedEvents = [...upcomingEvents, ...pastEvents];
 
+      if (sortedEvents.length === 0) {
+        return (
+          <View style={styles.emptyState}>
+            <Ionicons name="calendar-outline" size={48} color="#9ca3af" />
+            <Text style={styles.emptyStateText}>Nenhum evento encontrado</Text>
+          </View>
+        );
+      }
+
       return (
         <FlatList
           data={sortedEvents}
           renderItem={renderEventItem}
           keyExtractor={(item) => item.id}
+          scrollEnabled={false}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.listContainer}
-          ListEmptyComponent={() => (
-            <View style={styles.emptyState}>
-              <Ionicons name="calendar-outline" size={48} color="#9ca3af" />
-              <Text style={styles.emptyStateText}>Nenhum evento encontrado</Text>
-            </View>
-          )}
         />
       );
     } else {
+      if (activities.length === 0) {
+        return (
+          <View style={styles.emptyState}>
+            <Ionicons name="document-outline" size={48} color="#9ca3af" />
+            <Text style={styles.emptyStateText}>Nenhuma atividade encontrada</Text>
+          </View>
+        );
+      }
+
       return (
         <FlatList
           data={activities}
           renderItem={renderActivityItem}
           keyExtractor={(item) => item.id}
+          scrollEnabled={false}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.listContainer}
-          ListEmptyComponent={() => (
-            <View style={styles.emptyState}>
-              <Ionicons name="document-outline" size={48} color="#9ca3af" />
-              <Text style={styles.emptyStateText}>Nenhuma atividade encontrada</Text>
-            </View>
-          )}
         />
       );
     }
@@ -334,38 +323,41 @@ export default function StudentProfile({ navigation, route }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#3b82f6" />
-      
+      {/* StatusBar with blue background and light text */}
+      <StatusBar backgroundColor="#1e3a8a" barStyle="light-content" />
+
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-          <Ionicons name="arrow-back" size={24} color="white" />
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Perfil do Estudante</Text>
+        <Text style={styles.headerText}>Perfil do Estudante</Text>
         <TouchableOpacity style={styles.contactButton} onPress={handleContactPress}>
-          <Ionicons name="call-outline" size={24} color="white" />
+          <Ionicons name="call-outline" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
 
       <ScrollView 
-        style={styles.content}
+        style={styles.scrollView}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={handleRefresh}
-            colors={['#3b82f6']}
-            tintColor="#3b82f6"
+            colors={['#1e3a8a']}
+            tintColor="#1e3a8a"
           />
         }
       >
         {/* Profile Card */}
-        <View style={styles.profileCard}>
+        <View style={styles.profileContainer}>
           <View style={styles.profileImageContainer}>
             <Image
               source={{ uri: studentData.avatar }}
               style={styles.profileImage}
               onError={() => {
-                // Handle image loading error
                 console.log('Failed to load profile image');
               }}
             />
@@ -396,20 +388,21 @@ export default function StudentProfile({ navigation, route }) {
             </View>
           </View>
 
-          {/* Action Buttons */}
-          <View style={styles.actionButtonsContainer}>
-            <TouchableOpacity style={styles.diaryButton} onPress={() => navigation.navigate('AcessarDiario')}>
-              <Ionicons name="book-outline" size={20} color="white" />
-              <Text style={styles.diaryButtonText}>Acessar Diário</Text>
-            </TouchableOpacity>
-          </View>
+          {/* Action Button */}
+          <TouchableOpacity 
+            style={styles.button} 
+            onPress={() => navigation.navigate('AcessarDiario')}
+          >
+            <Ionicons name="book-outline" size={20} color="#fff" />
+            <Text style={styles.buttonText}>Acessar Diário</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Tabs */}
         <View style={styles.tabContainer}>
           <TouchableOpacity
             style={[styles.tab, selectedTab === 'eventos' && styles.activeTab]}
-            onPress={() => handleTabPress('eventos')}
+            onPress={() => setSelectedTab('eventos')}
           >
             <Text style={[styles.tabText, selectedTab === 'eventos' && styles.activeTabText]}>
               Eventos ({events.length})
@@ -417,7 +410,7 @@ export default function StudentProfile({ navigation, route }) {
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.tab, selectedTab === 'atividades' && styles.activeTab]}
-            onPress={() => handleTabPress('atividades')}
+            onPress={() => setSelectedTab('atividades')}
           >
             <Text style={[styles.tabText, selectedTab === 'atividades' && styles.activeTabText]}>
               Atividades ({activities.length})
@@ -426,7 +419,7 @@ export default function StudentProfile({ navigation, route }) {
         </View>
 
         {/* Tab Content */}
-        <View style={styles.tabContent}>
+        <View style={styles.tabContentContainer}>
           {renderTabContent()}
         </View>
       </ScrollView>
@@ -437,46 +430,40 @@ export default function StudentProfile({ navigation, route }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#f4f6fa',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingTop: 10,
+    paddingBottom: 15,
     paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: '#3b82f6',
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    backgroundColor: '#1e3a8a',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
   },
   backButton: {
-    padding: 8,
+    padding: 5,
   },
-  headerTitle: {
-    flex: 1,
-    fontSize: 18,
-    fontWeight: '600',
-    color: 'white',
-    textAlign: 'center',
+  headerText: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
   },
   contactButton: {
-    padding: 8,
+    padding: 5,
   },
-  content: {
+  scrollView: {
     flex: 1,
   },
-  profileCard: {
-    backgroundColor: 'white',
-    margin: 16,
-    borderRadius: 16,
+  profileContainer: {
+    margin: 20,
     padding: 20,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
+    backgroundColor: '#fff',
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
   },
   profileImageContainer: {
     alignSelf: 'center',
@@ -488,7 +475,7 @@ const styles = StyleSheet.create({
     height: 80,
     borderRadius: 40,
     borderWidth: 3,
-    borderColor: '#3b82f6',
+    borderColor: '#1e3a8a',
   },
   onlineIndicator: {
     position: 'absolute',
@@ -507,14 +494,14 @@ const styles = StyleSheet.create({
   },
   profileName: {
     fontSize: 22,
-    fontWeight: '700',
-    color: '#1f2937',
+    fontWeight: 'bold',
+    color: '#1e3a8a',
     marginBottom: 4,
   },
   profileClass: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#3b82f6',
+    color: '#1e3a8a',
     marginBottom: 2,
   },
   profileTeacher: {
@@ -526,7 +513,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     marginBottom: 20,
     paddingVertical: 16,
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#f9fafb',
     borderRadius: 12,
   },
   statItem: {
@@ -534,8 +521,8 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: 20,
-    fontWeight: '700',
-    color: '#1f2937',
+    fontWeight: 'bold',
+    color: '#1e3a8a',
   },
   statLabel: {
     fontSize: 12,
@@ -546,34 +533,29 @@ const styles = StyleSheet.create({
     width: 1,
     backgroundColor: '#e5e7eb',
   },
-  actionButtonsContainer: {
-    gap: 12,
-  },
-  diaryButton: {
-    backgroundColor: '#3b82f6',
+  button: {
+    backgroundColor: '#1e3a8a',
+    padding: 16,
     borderRadius: 12,
-    paddingVertical: 12,
-    flexDirection: 'row',
     alignItems: 'center',
+    flexDirection: 'row',
     justifyContent: 'center',
     gap: 8,
   },
-  diaryButtonText: {
-    color: 'white',
+  buttonText: {
+    color: '#fff',
+    fontWeight: 'bold',
     fontSize: 16,
-    fontWeight: '600',
   },
   tabContainer: {
     flexDirection: 'row',
-    marginHorizontal: 16,
-    backgroundColor: 'white',
+    marginHorizontal: 20,
+    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 4,
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    marginBottom: 20,
   },
   tab: {
     flex: 1,
@@ -582,7 +564,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   activeTab: {
-    backgroundColor: '#3b82f6',
+    backgroundColor: '#1e3a8a',
   },
   tabText: {
     fontSize: 14,
@@ -590,36 +572,29 @@ const styles = StyleSheet.create({
     color: '#6b7280',
   },
   activeTabText: {
-    color: 'white',
+    color: '#fff',
   },
-  tabContent: {
-    flex: 1,
-    marginTop: 8,
-  },
-  listContainer: {
-    paddingHorizontal: 16,
-    paddingBottom: 20,
+  tabContentContainer: {
+    marginHorizontal: 20,
+    marginBottom: 20,
   },
   eventItem: {
-    backgroundColor: 'white',
+    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
     flexDirection: 'row',
-    alignItems: 'center',
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
+    alignItems: 'flex-start',
   },
   pastEvent: {
     opacity: 0.7,
   },
   eventIconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
@@ -627,54 +602,52 @@ const styles = StyleSheet.create({
   eventContent: {
     flex: 1,
   },
+  eventHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
   eventTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#1f2937',
-    marginBottom: 4,
+    fontWeight: 'bold',
+    color: '#1e3a8a',
+    flex: 1,
+  },
+  eventDate: {
+    fontSize: 12,
+    color: '#6b7280',
+  },
+  pastEventText: {
+    textDecorationLine: 'line-through',
   },
   eventDescription: {
     fontSize: 14,
-    color: '#6b7280',
+    color: '#374151',
     marginBottom: 4,
   },
   eventLocationContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    marginBottom: 8,
+    marginBottom: 4,
   },
   eventLocation: {
     fontSize: 12,
-    color: '#9ca3af',
-  },
-  eventDateContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  eventDate: {
-    fontSize: 12,
-    color: '#9ca3af',
-  },
-  pastEventText: {
-    textDecorationLine: 'line-through',
+    color: '#6b7280',
   },
   eventTime: {
     fontSize: 12,
-    color: '#3b82f6',
-    fontWeight: '500',
+    color: '#1e3a8a',
+    fontWeight: '600',
   },
   activityItem: {
-    backgroundColor: 'white',
+    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
   },
   overdueActivity: {
     borderLeftWidth: 4,
@@ -683,13 +656,19 @@ const styles = StyleSheet.create({
   activityHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     marginBottom: 8,
+  },
+  activitySubjectContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flex: 1,
   },
   activitySubject: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#3b82f6',
+    color: '#1e3a8a',
   },
   statusBadge: {
     paddingHorizontal: 8,
@@ -697,33 +676,33 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   statusText: {
+    fontSize: 10,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+  },
+  activityDate: {
     fontSize: 12,
-    fontWeight: '500',
+    color: '#6b7280',
   },
   activityTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#1f2937',
+    fontWeight: 'bold',
+    color: '#111827',
     marginBottom: 4,
   },
   activityDescription: {
     fontSize: 14,
-    color: '#6b7280',
+    color: '#374151',
     marginBottom: 8,
   },
   activityFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-end',
-  },
-  activityDate: {
-    fontSize: 12,
-    color: '#9ca3af',
+    alignItems: 'center',
   },
   activityDueDate: {
     fontSize: 12,
-    color: '#9ca3af',
-    marginTop: 2,
+    color: '#6b7280',
   },
   overdueText: {
     color: '#ef4444',
@@ -736,12 +715,12 @@ const styles = StyleSheet.create({
   },
   emptyState: {
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 40,
+    padding: 40,
   },
   emptyStateText: {
-    fontSize: 16,
     color: '#9ca3af',
+    fontSize: 16,
     marginTop: 12,
+    textAlign: 'center',
   },
 });
