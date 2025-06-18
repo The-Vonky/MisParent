@@ -1,20 +1,22 @@
-import { useState, useCallback, useMemo } from 'react';
-import { 
-  View, 
-  Text, 
-  TouchableOpacity, 
-  FlatList, 
-  StyleSheet, 
+import React, { useState, useCallback, useMemo } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
   ScrollView,
-  RefreshControl,
+  SafeAreaView,
   StatusBar,
+  FlatList,
   Modal,
-  Alert
+  Alert,
+  RefreshControl,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 
-export default function StudentDiary({ navigation, route }) {
+export default function StudentDiary({ route }) {
+  const navigation = useNavigation();
   const [refreshing, setRefreshing] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState('2º Bimestre');
   const [selectedSubject, setSelectedSubject] = useState(null);
@@ -26,8 +28,8 @@ export default function StudentDiary({ navigation, route }) {
   // Dados mockados do diário
   const diaryData = useMemo(() => ({
     student: {
-      name: studentName || 'Lucas Oliveira',
-      class: '2A',
+      name: studentName || 'Mano Gandalf',
+      class: '2 - A',
       year: '2025'
     },
     periods: ['1º Bimestre', '2º Bimestre', '3º Bimestre', '4º Bimestre'],
@@ -159,10 +161,6 @@ export default function StudentDiary({ navigation, route }) {
     }
   }, []);
 
-  const handleBack = useCallback(() => {
-    navigation.goBack();
-  }, [navigation]);
-
   const handleSubjectPress = useCallback((subject) => {
     setSelectedSubject(subject);
     setModalVisible(true);
@@ -201,7 +199,30 @@ export default function StudentDiary({ navigation, route }) {
     return { ...totals, percentage };
   }, [diaryData.subjects, selectedPeriod]);
 
-  // Render functions
+  // Helper functions
+  const getGradeColor = useCallback((grade) => {
+    if (grade >= 9) return '#10b981';
+    if (grade >= 7) return '#1e3a8a';
+    if (grade >= 5) return '#f59e0b';
+    return '#ef4444';
+  }, []);
+
+  const getAttendanceColor = useCallback((percentage) => {
+    if (percentage >= 90) return '#10b981';
+    if (percentage >= 75) return '#f59e0b';
+    return '#ef4444';
+  }, []);
+
+  const getSkillLevelColor = useCallback((level) => {
+    switch (level) {
+      case 'Excelente': return '#10b981';
+      case 'Bom': return '#1e3a8a';
+      case 'Satisfatório': return '#f59e0b';
+      default: return '#6b7280';
+    }
+  }, []);
+
+  // Render components
   const renderPeriodSelector = () => (
     <ScrollView 
       horizontal 
@@ -229,12 +250,12 @@ export default function StudentDiary({ navigation, route }) {
   );
 
   const renderSummaryCard = () => (
-    <View style={styles.summaryCard}>
-      <Text style={styles.summaryTitle}>Resumo do {selectedPeriod}</Text>
+    <View style={styles.summaryContainer}>
+      <Text style={styles.sectionTitle}>Resumo do {selectedPeriod}</Text>
       <View style={styles.summaryContent}>
         <View style={styles.summaryItem}>
           <View style={styles.summaryIconContainer}>
-            <Ionicons name="school-outline" size={24} color="#3b82f6" />
+            <Ionicons name="school" size={24} color="#1e3a8a" />
           </View>
           <View style={styles.summaryTextContainer}>
             <Text style={styles.summaryValue}>{periodAverage}</Text>
@@ -246,7 +267,7 @@ export default function StudentDiary({ navigation, route }) {
         
         <View style={styles.summaryItem}>
           <View style={styles.summaryIconContainer}>
-            <Ionicons name="calendar-outline" size={24} color="#10b981" />
+            <Ionicons name="calendar" size={24} color="#10b981" />
           </View>
           <View style={styles.summaryTextContainer}>
             <Text style={styles.summaryValue}>{periodAttendance.percentage}%</Text>
@@ -263,58 +284,32 @@ export default function StudentDiary({ navigation, route }) {
     </View>
   );
 
-  const getGradeColor = useCallback((grade) => {
-    if (grade >= 9) return '#10b981';
-    if (grade >= 7) return '#3b82f6';
-    if (grade >= 5) return '#f59e0b';
-    return '#ef4444';
-  }, []);
-
-  const getAttendanceColor = useCallback((percentage) => {
-    if (percentage >= 90) return '#10b981';
-    if (percentage >= 75) return '#f59e0b';
-    return '#ef4444';
-  }, []);
-
-  const getSkillLevelColor = useCallback((level) => {
-    switch (level) {
-      case 'Excelente': return '#10b981';
-      case 'Bom': return '#3b82f6';
-      case 'Satisfatório': return '#f59e0b';
-      default: return '#6b7280';
-    }
-  }, []);
-
   const renderSubjectItem = useCallback(({ item }) => (
-    <TouchableOpacity style={styles.subjectCard} onPress={() => handleSubjectPress(item)}>
+    <TouchableOpacity style={styles.subjectItem} onPress={() => handleSubjectPress(item)}>
       <View style={styles.subjectHeader}>
-        <View>
+        <View style={styles.subjectInfo}>
           <Text style={styles.subjectName}>{item.name}</Text>
           <Text style={styles.teacherName}>{item.teacher}</Text>
         </View>
-        <View style={styles.subjectStats}>
-          <View style={[styles.gradeCircle, { borderColor: getGradeColor(item.average) }]}>
-            <Text style={[styles.gradeText, { color: getGradeColor(item.average) }]}>
-              {item.average.toFixed(1)}
-            </Text>
-          </View>
-        </View>
-      </View>
-      
-      <View style={styles.subjectInfo}>
-        <View style={styles.infoItem}>
-          <Ionicons name="clipboard-outline" size={16} color="#6b7280" />
-          <Text style={styles.infoText}>{item.grades.length} avaliações</Text>
-        </View>
-        <View style={styles.infoItem}>
-          <Ionicons name="calendar-outline" size={16} color={getAttendanceColor(item.attendance.percentage)} />
-          <Text style={[styles.infoText, { color: getAttendanceColor(item.attendance.percentage) }]}>
-            {item.attendance.percentage}% frequência
+        <View style={[styles.gradeCircle, { borderColor: getGradeColor(item.average) }]}>
+          <Text style={[styles.gradeText, { color: getGradeColor(item.average) }]}>
+            {item.average.toFixed(1)}
           </Text>
         </View>
       </View>
       
-      <Ionicons name="chevron-forward" size={20} color="#9ca3af" style={styles.chevronIcon} />
+      <View style={styles.subjectDetails}>
+        <View style={styles.detailItem}>
+          <Ionicons name="clipboard" size={16} color="#6b7280" />
+          <Text style={styles.detailText}>{item.grades.length} avaliações</Text>
+        </View>
+        <View style={styles.detailItem}>
+          <Ionicons name="calendar" size={16} color={getAttendanceColor(item.attendance.percentage)} />
+          <Text style={[styles.detailText, { color: getAttendanceColor(item.attendance.percentage) }]}>
+            {item.attendance.percentage}% frequência
+          </Text>
+        </View>
+      </View>
     </TouchableOpacity>
   ), [handleSubjectPress, getGradeColor, getAttendanceColor]);
 
@@ -340,7 +335,7 @@ export default function StudentDiary({ navigation, route }) {
             <ScrollView style={styles.modalBody}>
               {/* Notas */}
               <View style={styles.modalSection}>
-                <Text style={styles.sectionTitle}>Avaliações</Text>
+                <Text style={styles.modalSectionTitle}>Avaliações</Text>
                 {selectedSubject.grades.map((grade, index) => (
                   <View key={index} style={styles.gradeItem}>
                     <View style={styles.gradeInfo}>
@@ -361,7 +356,7 @@ export default function StudentDiary({ navigation, route }) {
 
               {/* Habilidades */}
               <View style={styles.modalSection}>
-                <Text style={styles.sectionTitle}>Desenvolvimento de Habilidades</Text>
+                <Text style={styles.modalSectionTitle}>Desenvolvimento de Habilidades</Text>
                 {selectedSubject.skills.map((skill, index) => (
                   <View key={index} style={styles.skillItem}>
                     <Text style={styles.skillName}>{skill.name}</Text>
@@ -376,7 +371,7 @@ export default function StudentDiary({ navigation, route }) {
 
               {/* Observações */}
               <View style={styles.modalSection}>
-                <Text style={styles.sectionTitle}>Observações do Professor</Text>
+                <Text style={styles.modalSectionTitle}>Observações do Professor</Text>
                 <View style={styles.observationContainer}>
                   <Text style={styles.observationText}>{selectedSubject.observations}</Text>
                 </View>
@@ -384,13 +379,13 @@ export default function StudentDiary({ navigation, route }) {
 
               {/* Frequência Detalhada */}
               <View style={styles.modalSection}>
-                <Text style={styles.sectionTitle}>Frequência</Text>
+                <Text style={styles.modalSectionTitle}>Frequência</Text>
                 <View style={styles.attendanceContainer}>
                   <View style={styles.attendanceStats}>
                     <Text style={styles.attendanceNumber}>
                       {selectedSubject.attendance.present}/{selectedSubject.attendance.total}
                     </Text>
-                    <Text style={styles.attendanceLabel}>aulas presentes</Text>
+                    <Text style={styles.attendanceStatsLabel}>aulas presentes</Text>
                   </View>
                   <View style={[
                     styles.attendancePercentage, 
@@ -416,28 +411,32 @@ export default function StudentDiary({ navigation, route }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#3b82f6" />
-      
+      {/* StatusBar com background azul e texto claro */}
+      <StatusBar backgroundColor="#1e3a8a" barStyle="light-content" />
+
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-          <Ionicons name="arrow-back" size={24} color="white" />
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
         <View style={styles.headerContent}>
-          <Text style={styles.headerTitle}>Diário Escolar</Text>
+          <Text style={styles.headerText}>Diário Escolar</Text>
           <Text style={styles.headerSubtitle}>{diaryData.student.name}</Text>
         </View>
-        <View style={styles.headerSpacer} />
+        <View style={styles.placeholder} />
       </View>
 
       <ScrollView 
-        style={styles.content}
+        style={styles.scrollView}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={handleRefresh}
-            colors={['#3b82f6']}
-            tintColor="#3b82f6"
+            colors={['#1e3a8a']}
+            tintColor="#1e3a8a"
           />
         }
       >
@@ -449,14 +448,23 @@ export default function StudentDiary({ navigation, route }) {
 
         {/* Subjects List */}
         <View style={styles.subjectsContainer}>
-          <Text style={styles.subjectsTitle}>Disciplinas</Text>
-          <FlatList
-            data={currentSubjects}
-            renderItem={renderSubjectItem}
-            keyExtractor={(item) => item.id}
-            scrollEnabled={false}
-            ItemSeparatorComponent={() => <View style={styles.separator} />}
-          />
+          <Text style={styles.sectionTitle}>Disciplinas</Text>
+          {currentSubjects.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Ionicons name="school" size={48} color="#9ca3af" />
+              <Text style={styles.emptyStateText}>
+                Nenhuma disciplina encontrada para este período
+              </Text>
+            </View>
+          ) : (
+            <FlatList
+              data={currentSubjects}
+              renderItem={renderSubjectItem}
+              keyExtractor={(item) => item.id}
+              scrollEnabled={false}
+              showsVerticalScrollIndicator={false}
+            />
+          )}
         </View>
       </ScrollView>
 
@@ -469,45 +477,43 @@ export default function StudentDiary({ navigation, route }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#f4f6fa',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingTop: 10,
+    paddingBottom: 15,
     paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: '#3b82f6',
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    backgroundColor: '#1e3a8a',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
   },
   backButton: {
-    padding: 8,
+    padding: 5,
   },
   headerContent: {
-    flex: 1,
     alignItems: 'center',
   },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: 'white',
+  headerText: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
   },
   headerSubtitle: {
-    fontSize: 14,
     color: '#e0e7ff',
+    fontSize: 14,
     marginTop: 2,
   },
-  headerSpacer: {
-    width: 32,
+  placeholder: {
+    width: 34, // Para balancear o header
   },
-  content: {
+  scrollView: {
     flex: 1,
   },
   periodSelector: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
     paddingVertical: 16,
     gap: 8,
   },
@@ -515,39 +521,35 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: 'white',
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+  },
+  activePeriodButton: {
+    backgroundColor: '#1e3a8a',
+    borderColor: '#1e3a8a',
+  },
+  periodButtonText: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#374151',
+  },
+  activePeriodButtonText: {
+    color: '#fff',
+  },
+  summaryContainer: {
+    margin: 20,
+    padding: 20,
+    backgroundColor: '#fff',
+    borderRadius: 15,
     borderWidth: 1,
     borderColor: '#e5e7eb',
   },
-  activePeriodButton: {
-    backgroundColor: '#3b82f6',
-    borderColor: '#3b82f6',
-  },
-  periodButtonText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#6b7280',
-  },
-  activePeriodButtonText: {
-    color: 'white',
-  },
-  summaryCard: {
-    backgroundColor: 'white',
-    margin: 16,
-    borderRadius: 16,
-    padding: 20,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-  },
-  summaryTitle: {
+  sectionTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#1f2937',
-    marginBottom: 16,
-    textAlign: 'center',
+    fontWeight: 'bold',
+    marginBottom: 15,
+    color: '#1e3a8a',
   },
   summaryContent: {
     flexDirection: 'row',
@@ -561,7 +563,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#f9fafb',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 8,
@@ -572,7 +574,7 @@ const styles = StyleSheet.create({
   summaryValue: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#1f2937',
+    color: '#111827',
   },
   summaryLabel: {
     fontSize: 12,
@@ -591,27 +593,20 @@ const styles = StyleSheet.create({
     borderTopColor: '#f3f4f6',
   },
   attendanceText: {
-    fontSize: 14,
+    fontSize: 12,
     color: '#6b7280',
   },
   subjectsContainer: {
-    margin: 16,
+    margin: 20,
+    marginTop: 0,
   },
-  subjectsTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#1f2937',
-    marginBottom: 12,
-  },
-  subjectCard: {
-    backgroundColor: 'white',
-    borderRadius: 12,
+  subjectItem: {
+    backgroundColor: '#fff',
     padding: 16,
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
+    borderRadius: 12,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
   },
   subjectHeader: {
     flexDirection: 'row',
@@ -619,18 +614,18 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     marginBottom: 12,
   },
+  subjectInfo: {
+    flex: 1,
+  },
   subjectName: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#1f2937',
+    fontWeight: 'bold',
+    color: '#111827',
   },
   teacherName: {
     fontSize: 14,
     color: '#6b7280',
     marginTop: 2,
-  },
-  subjectStats: {
-    alignItems: 'center',
   },
   gradeCircle: {
     width: 50,
@@ -639,33 +634,34 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'white',
+    backgroundColor: '#fff',
   },
   gradeText: {
     fontSize: 16,
     fontWeight: '700',
   },
-  subjectInfo: {
+  subjectDetails: {
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  infoItem: {
+  detailItem: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
   },
-  infoText: {
+  detailText: {
     fontSize: 12,
     color: '#6b7280',
   },
-  chevronIcon: {
-    position: 'absolute',
-    right: 16,
-    top: '50%',
-    marginTop: -10,
+  emptyState: {
+    alignItems: 'center',
+    padding: 40,
   },
-  separator: {
-    height: 12,
+  emptyStateText: {
+    color: '#9ca3af',
+    fontSize: 16,
+    marginTop: 12,
+    textAlign: 'center',
   },
   modalOverlay: {
     flex: 1,
@@ -673,7 +669,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: 'white',
+    backgroundColor: '#fff',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     maxHeight: '90%',
@@ -684,12 +680,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#f3f4f6',
+    borderBottomColor: '#e5e7eb',
   },
   modalTitle: {
     fontSize: 20,
-    fontWeight: '600',
-    color: '#1f2937',
+    fontWeight: 'bold',
+    color: '#1e3a8a',
   },
   modalBody: {
     flex: 1,
@@ -698,10 +694,10 @@ const styles = StyleSheet.create({
   modalSection: {
     marginBottom: 24,
   },
-  sectionTitle: {
+  modalSectionTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#1f2937',
+    fontWeight: 'bold',
+    color: '#1e3a8a',
     marginBottom: 12,
   },
   gradeItem: {
@@ -716,9 +712,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   gradeType: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#1f2937',
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#111827',
   },
   gradeDate: {
     fontSize: 12,
@@ -730,7 +726,7 @@ const styles = StyleSheet.create({
   },
   gradeValue: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: 'bold',
   },
   gradeWeight: {
     fontSize: 10,
@@ -744,46 +740,50 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   skillName: {
-    fontSize: 14,
-    color: '#1f2937',
+    fontSize: 16,
+    color: '#111827',
     flex: 1,
   },
   skillLevel: {
     paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
   },
   skillLevelText: {
     fontSize: 12,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   observationContainer: {
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#f9fafb',
     borderRadius: 12,
     padding: 16,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
   },
   observationText: {
-    fontSize: 14,
-    color: '#4b5563',
-    lineHeight: 20,
+    fontSize: 16,
+    color: '#111827',
+    lineHeight: 22,
   },
   attendanceContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#f9fafb',
     borderRadius: 12,
     padding: 16,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
   },
   attendanceStats: {
     flex: 1,
   },
   attendanceNumber: {
     fontSize: 20,
-    fontWeight: '700',
-    color: '#1f2937',
+    fontWeight: 'bold',
+    color: '#111827',
   },
-  attendanceLabel: {
+  attendanceStatsLabel: {
     fontSize: 12,
     color: '#6b7280',
     marginTop: 2,
@@ -791,10 +791,10 @@ const styles = StyleSheet.create({
   attendancePercentage: {
     paddingHorizontal: 16,
     paddingVertical: 8,
-    borderRadius: 12,
+    borderRadius: 20,
   },
   attendancePercentageText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: 'bold',
   },
 });

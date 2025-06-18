@@ -85,13 +85,13 @@ const ProfileMenu = ({ visible, onClose, user }) => {
             />
 
             <View style={styles.infoContainer}>
-              <Text style={styles.username}>{user?.name || 'Nome do Usuário'}</Text>
+              <Text style={styles.username}>{user?.name || 'Mano Gandalf'}</Text>
               <Text style={styles.role}>{user?.role || 'Trocar de Usuário'}</Text>
             </View>
           </View>
 
         <View style={styles.divider} />
-        <MenuItem icon="person" label="Gerenciar Usuário" onPress={() => navigation.navigate('PerfilAluno')} />
+        <MenuItem icon="person" label="Perfil do Estudante" onPress={() => navigation.navigate('PerfilAluno')} />
         <View style={styles.divider} />
         <MenuItem icon="calendar" label="Grade de Horários" />
         <View style={styles.divider} />
@@ -99,7 +99,7 @@ const ProfileMenu = ({ visible, onClose, user }) => {
         <View style={styles.divider} />
         <MenuItem icon="checkbox" label="Frequência" />
         <View style={styles.divider} />
-        <MenuItem icon="school" label="Materiais do Aluno" onPress={() => navigation.navigate('Materials')}/>
+        <MenuItem icon="school" label="Materiais Escolares" onPress={() => navigation.navigate('Materials')}/>
         <View style={styles.divider} />
         <MenuItem icon="book" label="Plano de Aula" onPress={() => navigation.navigate('PlanoDeAula')} />
         <View style={styles.divider} />
