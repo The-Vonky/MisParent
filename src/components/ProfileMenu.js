@@ -95,15 +95,15 @@ const ProfileMenu = ({ visible, onClose, user }) => {
         <View style={styles.divider} />
         <MenuItem icon="calendar" label="Grade de Horários" onPress={() => navigation.navigate('GradeHorario')}/>
         <View style={styles.divider} />
-        <MenuItem icon="list" label="Atividades e Tarefas" />
+        <MenuItem icon="list" label="Atividades e Tarefas" onPress={() => navigation.navigate('Atividades')}/>
         <View style={styles.divider} />
-        <MenuItem icon="checkbox" label="Frequência" />
+        <MenuItem icon="checkbox" label="Frequência" onPress={() => navigation.navigate('Frequencia')}/>
         <View style={styles.divider} />
         <MenuItem icon="school" label="Materiais Escolares" onPress={() => navigation.navigate('Materials')}/>
         <View style={styles.divider} />
         <MenuItem icon="book" label="Plano de Aula" onPress={() => navigation.navigate('PlanoDeAula')} />
         <View style={styles.divider} />
-        <MenuItem icon="business" label="Secretaria" />
+        <MenuItem icon="business" label="Secretaria" onPress={() => navigation.navigate('Secretaria')}/>
         <View style={styles.divider} />
         <MenuItem icon="settings" label="Configurações" onPress={() => navigation.navigate('Settings')} />
         <View style={styles.divider} />

@@ -16,6 +16,9 @@ import ChatScreen from '../screens/ChatScreen';
 import AcessarDiarioScreen from '../screens/AcessarDiarioScreen';
 import MaterialsScreen from '../screens/MaterialsScreen';
 import GradeHorarioScreen from '../screens/GradeHorarioScreen';
+import AtividadesScreen from '../screens/AtividadesScreen';
+import FrequenciaScreen from '../screens/FrequenciaScreen';
+import SecretariaScreen from '../screens/SecretariaScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -26,6 +29,21 @@ export default function StackNavigator() {
           <Stack.Screen
             name="AcessarDiario"
             component={AcessarDiarioScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Secretaria"
+            component={SecretariaScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Frequencia"
+            component={FrequenciaScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Atividades"
+            component={AtividadesScreen}
             options={{ headerShown: false }}
           />
           <Stack.Screen
