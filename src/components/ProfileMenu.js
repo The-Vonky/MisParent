@@ -93,7 +93,7 @@ const ProfileMenu = ({ visible, onClose, user }) => {
         <View style={styles.divider} />
         <MenuItem icon="person" label="Perfil do Estudante" onPress={() => navigation.navigate('PerfilAluno')} />
         <View style={styles.divider} />
-        <MenuItem icon="calendar" label="Grade de Horários" />
+        <MenuItem icon="calendar" label="Grade de Horários" onPress={() => navigation.navigate('GradeHorario')}/>
         <View style={styles.divider} />
         <MenuItem icon="list" label="Atividades e Tarefas" />
         <View style={styles.divider} />
