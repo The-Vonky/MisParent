@@ -12,9 +12,10 @@ import PlanoDeAulaScreen from '../screens/PlanoDeAulaScreen';
 import PlanoDeAulaDetalhadoScreen from '../screens/PlanoDeAulaDetalhadoScreen';
 import PerfilAlunoScreen from '../screens/PerfilAlunoScreen';
 import MessagesScreen from '../screens/Messages.Screen';
-import ChatScreen from '../screens/ChatScreen'; // Removido o './' extra
-import AcessarDiarioScreen from '../screens/AcessarDiarioScreen'; // Importando o novo componente
+import ChatScreen from '../screens/ChatScreen';
+import AcessarDiarioScreen from '../screens/AcessarDiarioScreen';
 import MaterialsScreen from '../screens/MaterialsScreen';
+import GradeHorarioScreen from '../screens/GradeHorarioScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -25,6 +26,11 @@ export default function StackNavigator() {
           <Stack.Screen
             name="AcessarDiario"
             component={AcessarDiarioScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="GradeHorario"
+            component={GradeHorarioScreen}
             options={{ headerShown: false }}
           />
           <Stack.Screen
