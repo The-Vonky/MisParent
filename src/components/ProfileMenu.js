@@ -79,13 +79,13 @@ const ProfileMenu = ({ visible, onClose, user }) => {
           <View style={styles.header}>
             <Image
               source={{
-                uri: 'https://static1.srcdn.com/wordpress/wp-content/uploads/2017/07/Sir-Ian-McKellen-as-Gandalf-The-Grey-The-Shire-Lord-of-the-Rings-Peter-Jackson.jpg',
+                uri: 'https://www.pintarcolorir.com.br/wp-content/uploads/2015/04/Desenhos-para-colorir-de-alunos-01-172x159.jpg',
               }}
               style={styles.avatar}
             />
 
             <View style={styles.infoContainer}>
-              <Text style={styles.username}>{user?.name || 'Mano Gandalf'}</Text>
+              <Text style={styles.username}>{user?.name || 'James Júnior'}</Text>
               <Text style={styles.role}>{user?.role || 'Trocar de Usuário'}</Text>
             </View>
           </View>

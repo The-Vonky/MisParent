@@ -30,8 +30,14 @@ export default function SettingsScreen() {
           text: 'Sair', 
           style: 'destructive',
           onPress: () => {
-            // Aqui você implementaria a lógica de logout
+            // Limpar dados do usuário (tokens, dados locais, etc.)
             console.log('Usuário deslogado');
+            
+            // Navegar para a tela de login e resetar o stack de navegação
+            navigation.reset({
+              index: 0,
+              routes: [{ name: 'Login' }],
+            });
           }
         }
       ]
@@ -237,7 +243,7 @@ export default function SettingsScreen() {
         {/* Botão de Sair */}
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <Ionicons name="log-out-outline" size={20} color="#dc2626" />
-          <Text style={styles.logoutButtonText}>Sair da conta</Text>
+          <Text style={styles.logoutButtonText}>Sair da conta </Text>
         </TouchableOpacity>
 
         {/* Espaço extra no final */}

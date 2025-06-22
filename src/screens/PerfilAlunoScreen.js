@@ -27,18 +27,18 @@ export default function StudentProfile({ route }) {
   // Enhanced mock data with error handling
   const studentData = useMemo(() => ({
     id: studentId || '1',
-    name: 'Mano Gandalf',
+    name: 'James Junior',
     class: '2 - A',
     teacher: 'Ana Carolina',
     modality: 'Integral',
-    avatar: 'https://static1.srcdn.com/wordpress/wp-content/uploads/2017/07/Sir-Ian-McKellen-as-Gandalf-The-Grey-The-Shire-Lord-of-the-Rings-Peter-Jackson.jpg',
+    avatar: 'https://www.pintarcolorir.com.br/wp-content/uploads/2015/04/Desenhos-para-colorir-de-alunos-01-172x159.jpg',
     stats: {
       attendance: '95%',
       grades: '8.5',
       activities: '12'
     },
     phone: '+55 11 99999-9999',
-    email: 'manoGandalf@escola.com',
+    email: 'jamesJunior@escola.com',
     birthDate: '2010-05-15',
     address: 'Rua das Flores, 123 - São Paulo, SP'
   }), [studentId]);

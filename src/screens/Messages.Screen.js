@@ -19,6 +19,8 @@ import {
   getDocs,
   onSnapshot,
   addDoc,
+  doc,
+  getDoc,
 } from 'firebase/firestore';
 import { auth, firestore } from '../config/firebaseConfig';
 
@@ -49,18 +51,65 @@ export default function MessagesScreen() {
       const snapshot = await getDocs(q);
       console.log('Documentos encontrados:', snapshot.docs.length);
       
-      snapshot.docs.forEach(doc => {
-        console.log('Documento:', doc.id, doc.data());
-      });
-
       const results = snapshot.docs
         .filter((doc) => doc.id !== currentUser.uid)
-        .map((doc) => ({ id: doc.id, ...doc.data() }));
+        .map((doc) => {
+          const data = doc.data();
+          console.log('Dados do usuário encontrado:', {
+            id: doc.id,
+            nome: data.nome,
+            imagemUri: data.imagemUri,
+            photoURL: data.photoURL, // Caso use outro campo
+          });
+          return { id: doc.id, ...data };
+        });
       
       console.log('Resultados após filtro:', results);
       setSearchResults(results);
     } catch (error) {
       console.error('Erro na busca:', error);
+    }
+  };
+
+  // Função melhorada para buscar dados do usuário
+  const getUserData = async (userId) => {
+    try {
+      console.log('Buscando dados para userId:', userId);
+      
+      // Método mais direto usando doc()
+      const userDocRef = doc(firestore, 'Alunos', userId);
+      const userDoc = await getDoc(userDocRef);
+      
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        console.log('Dados encontrados:', {
+          id: userId,
+          nome: userData.nome,
+          imagemUri: userData.imagemUri,
+          photoURL: userData.photoURL, // Caso use outro campo
+        });
+        
+        return {
+          id: userId,
+          nome: userData.nome || 'Usuário',
+          // Tenta diferentes campos para a imagem
+          imagemUri: userData.imagemUri || userData.photoURL || userData.profileImage || null,
+        };
+      } else {
+        console.log('Documento não encontrado para userId:', userId);
+        return {
+          id: userId,
+          nome: 'Usuário',
+          imagemUri: null,
+        };
+      }
+    } catch (error) {
+      console.error('Erro ao buscar dados do usuário:', error);
+      return {
+        id: userId,
+        nome: 'Usuário',
+        imagemUri: null,
+      };
     }
   };
 
@@ -76,6 +125,8 @@ export default function MessagesScreen() {
         ...doc.data(),
       }));
 
+      console.log('Conversas encontradas:', convs.length);
+
       // Buscar dados dos outros participantes
       const conversationsWithUserData = await Promise.all(
         convs.map(async (conv) => {
@@ -83,37 +134,16 @@ export default function MessagesScreen() {
             (uid) => uid !== currentUser.uid
           );
           
-          try {
-            const userDoc = await getDocs(
-              query(collection(firestore, 'Alunos'), where('__name__', '==', otherUserId))
-            );
-            
-            if (!userDoc.empty) {
-              const userData = userDoc.docs[0].data();
-              return {
-                ...conv,
-                otherUser: {
-                  id: otherUserId,
-                  nome: userData.nome || 'Usuário',
-                  imagemUri: userData.imagemUri || null,
-                }
-              };
-            }
-          } catch (error) {
-            console.log('Erro ao buscar dados do usuário:', error);
-          }
+          const userData = await getUserData(otherUserId);
           
           return {
             ...conv,
-            otherUser: {
-              id: otherUserId,
-              nome: 'Usuário',
-              imagemUri: null,
-            }
+            otherUser: userData,
           };
         })
       );
 
+      console.log('Conversas com dados dos usuários:', conversationsWithUserData);
       setRecentConversations(conversationsWithUserData);
     });
 
@@ -157,12 +187,6 @@ export default function MessagesScreen() {
       }
 
       // Navegar para a tela de chat
-      console.log('Navegando para Chat com params:', {
-        conversationId,
-        recipientName: targetUser.nome,
-        recipientId: targetUser.id,
-      });
-
       navigation.navigate('Chat', {
         conversationId,
         recipientName: targetUser.nome,
@@ -173,21 +197,47 @@ export default function MessagesScreen() {
     }
   };
 
+  // Componente melhorado para renderizar avatar
+  const renderAvatar = (user) => {
+    const imageUri = user.imagemUri || user.photoURL || user.profileImage;
+    
+    console.log('Renderizando avatar para:', {
+      nome: user.nome,
+      imagemUri: imageUri,
+    });
+
+    if (imageUri && imageUri.trim() !== '') {
+      return (
+        <Image 
+          source={{ uri: imageUri }} 
+          style={styles.avatarImage}
+          onError={(error) => {
+            console.log('Erro ao carregar imagem:', error.nativeEvent.error);
+            console.log('URI da imagem:', imageUri);
+          }}
+          onLoad={() => {
+            console.log('Imagem carregada com sucesso:', imageUri);
+          }}
+        />
+      );
+    } else {
+      return (
+        <View style={styles.avatar}>
+          <Text style={styles.avatarText}>
+            {user.nome ? user.nome.charAt(0).toUpperCase() : 'U'}
+          </Text>
+        </View>
+      );
+    }
+  };
+
   const renderMessageItem = ({ item }) => (
     <TouchableOpacity
       style={styles.messageItem}
       onPress={() => openConversation(item)}
     >
       <View style={styles.avatarContainer}>
-        {item.imagemUri ? (
-          <Image source={{ uri: item.imagemUri }} style={styles.avatarImage} />
-        ) : (
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>
-              {item.nome ? item.nome.charAt(0).toUpperCase() : 'U'}
-            </Text>
-          </View>
-        )}
+        {renderAvatar(item)}
       </View>
       <View style={styles.messageContent}>
         <Text style={styles.name}>{item.nome || 'Usuário'}</Text>
@@ -198,7 +248,6 @@ export default function MessagesScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* StatusBar com background azul e texto claro */}
       <StatusBar backgroundColor="#1e3a8a" barStyle="light-content" />
 
       {/* Header */}
@@ -240,15 +289,7 @@ export default function MessagesScreen() {
                 onPress={() => openConversation(item.otherUser)}
               >
                 <View style={styles.avatarContainer}>
-                  {item.otherUser?.imagemUri ? (
-                    <Image source={{ uri: item.otherUser.imagemUri }} style={styles.avatarImage} />
-                  ) : (
-                    <View style={styles.avatar}>
-                      <Text style={styles.avatarText}>
-                        {item.otherUser?.nome ? item.otherUser.nome.charAt(0).toUpperCase() : 'U'}
-                      </Text>
-                    </View>
-                  )}
+                  {renderAvatar(item.otherUser)}
                 </View>
                 <View style={styles.messageContent}>
                   <Text style={styles.name}>
@@ -291,7 +332,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   placeholder: {
-    width: 34, // Para balancear o header
+    width: 34,
   },
   searchInput: {
     borderWidth: 1,
@@ -337,6 +378,7 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
+    backgroundColor: '#f0f0f0', // Cor de fundo enquanto carrega
   },
   avatarText: {
     color: '#fff',
