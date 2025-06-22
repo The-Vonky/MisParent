@@ -28,7 +28,7 @@ export default function StudentDiary({ route }) {
   // Dados mockados do diário
   const diaryData = useMemo(() => ({
     student: {
-      name: studentName || 'Mano Gandalf',
+      name: studentName || 'James Junior',
       class: '2 - A',
       year: '2025'
     },
