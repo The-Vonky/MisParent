@@ -9,12 +9,13 @@ import {
   Pressable,
   Alert,
   Modal,
+  SafeAreaView,
+  Image,
 } from 'react-native';
 import { signOut } from 'firebase/auth';
 import { auth } from '../config/firebaseConfig';
 import { BlurView } from 'expo-blur';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 const screenWidth = Dimensions.get('window').width;
@@ -74,49 +75,50 @@ const ProfileMenu = ({ visible, onClose, user }) => {
       </Pressable>
 
       <Animated.View style={[styles.menu, { transform: [{ translateX }] }]}>
-        <View style={styles.header}>
-          <Image
-            source={{
-              uri: 'https://static1.srcdn.com/wordpress/wp-content/uploads/2017/07/Sir-Ian-McKellen-as-Gandalf-The-Grey-The-Shire-Lord-of-the-Rings-Peter-Jackson.jpg',
-            }}
-            style={styles.avatar}
-          />
+        <SafeAreaView style={{ flex: 1 }}>
+          <View style={styles.header}>
+            <Image
+              source={{
+                uri: 'https://www.pintarcolorir.com.br/wp-content/uploads/2015/04/Desenhos-para-colorir-de-alunos-01-172x159.jpg',
+              }}
+              style={styles.avatar}
+            />
 
-          <View style={styles.infoContainer}>
-            <Text style={styles.username}>{user?.name || 'Nome do Usuário'}</Text>
-            <Text style={styles.role}>{user?.role || 'Tipo do Usuário'}</Text>
+            <View style={styles.infoContainer}>
+              <Text style={styles.username}>{user?.name || 'James Júnior'}</Text>
+              <Text style={styles.role}>{user?.role || 'Trocar de Usuário'}</Text>
+            </View>
           </View>
-        </View>
 
         <View style={styles.divider} />
-        <MenuItem icon="person" label="Gerenciar Usuário" />
+        <MenuItem icon="person" label="Perfil do Estudante" onPress={() => navigation.navigate('PerfilAluno')} />
         <View style={styles.divider} />
-        <MenuItem icon="calendar" label="Grade de Horários" />
+        <MenuItem icon="calendar" label="Grade de Horários" onPress={() => navigation.navigate('GradeHorario')}/>
         <View style={styles.divider} />
-        <MenuItem icon="list" label="Atividades e Tarefas" />
+        <MenuItem icon="list" label="Atividades e Tarefas" onPress={() => navigation.navigate('Atividades')}/>
         <View style={styles.divider} />
-        <MenuItem icon="checkbox" label="Frequência" />
+        <MenuItem icon="checkbox" label="Frequência" onPress={() => navigation.navigate('Frequencia')}/>
         <View style={styles.divider} />
-        <MenuItem icon="school" label="Materiais do Aluno" />
+        <MenuItem icon="school" label="Materiais Escolares" onPress={() => navigation.navigate('Materials')}/>
         <View style={styles.divider} />
-        <MenuItem icon="book" label="Plano de Aula" />
+        <MenuItem icon="book" label="Plano de Aula" onPress={() => navigation.navigate('PlanoDeAula')} />
         <View style={styles.divider} />
-        <MenuItem icon="business" label="Secretaria" />
+        <MenuItem icon="business" label="Secretaria" onPress={() => navigation.navigate('Secretaria')}/>
         <View style={styles.divider} />
-        <MenuItem icon="settings" label="Configurações" />
+        <MenuItem icon="settings" label="Configurações" onPress={() => navigation.navigate('Settings')} />
         <View style={styles.divider} />
 
-        <View style={{ flex: 1 }} />
-        <View style={styles.divider} />
-        <MenuItem
-          icon="log-out"
-          label="Sair"
-          color="#ef4444"
-          onPress={() => setShowLogoutModal(true)}
-        />
+          <View style={{ flex: 1 }} />
+          <View style={styles.divider} />
+          <MenuItem
+            icon="log-out"
+            label="Sair"
+            color="#ef4444"
+            onPress={() => setShowLogoutModal(true)}
+          />
+        </SafeAreaView>
       </Animated.View>
 
-      {/* Modal Bonito de Confirmação */}
       <Modal
         transparent
         animationType="fade"

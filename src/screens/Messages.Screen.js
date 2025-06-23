@@ -1,212 +1,401 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
   TextInput,
+  FlatList,
   TouchableOpacity,
   StyleSheet,
-  FlatList,
-  KeyboardAvoidingView,
-  Platform,
+  StatusBar,
+  SafeAreaView,
+  Image,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import {
   collection,
-  addDoc,
   query,
   where,
+  getDocs,
   onSnapshot,
-  updateDoc,
+  addDoc,
   doc,
+  getDoc,
 } from 'firebase/firestore';
-import { useNavigation } from '@react-navigation/native';
-import { firestore, auth } from '../config/firebaseConfig';
+import { auth, firestore } from '../config/firebaseConfig';
 
 export default function MessagesScreen() {
   const navigation = useNavigation();
   const currentUser = auth.currentUser;
-  const [messages, setMessages] = useState([]);
-  const [text, setText] = useState('');
-  const [recipientId, setRecipientId] = useState('admin');
-  const flatListRef = useRef(null);
+  const [search, setSearch] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [recentConversations, setRecentConversations] = useState([]);
+
+  const handleSearch = async (text) => {
+    setSearch(text);
+    if (text.length === 0) {
+      setSearchResults([]);
+      return;
+    }
+
+    try {
+      console.log('Buscando por:', text);
+      console.log('UID atual:', currentUser.uid);
+
+      const q = query(
+        collection(firestore, 'Alunos'),
+        where('nome', '>=', text),
+        where('nome', '<=', text + '\uf8ff')
+      );
+      
+      const snapshot = await getDocs(q);
+      console.log('Documentos encontrados:', snapshot.docs.length);
+      
+      const results = snapshot.docs
+        .filter((doc) => doc.id !== currentUser.uid)
+        .map((doc) => {
+          const data = doc.data();
+          console.log('Dados do usuário encontrado:', {
+            id: doc.id,
+            nome: data.nome,
+            imagemUri: data.imagemUri,
+            photoURL: data.photoURL, // Caso use outro campo
+          });
+          return { id: doc.id, ...data };
+        });
+      
+      console.log('Resultados após filtro:', results);
+      setSearchResults(results);
+    } catch (error) {
+      console.error('Erro na busca:', error);
+    }
+  };
+
+  // Função melhorada para buscar dados do usuário
+  const getUserData = async (userId) => {
+    try {
+      console.log('Buscando dados para userId:', userId);
+      
+      // Método mais direto usando doc()
+      const userDocRef = doc(firestore, 'Alunos', userId);
+      const userDoc = await getDoc(userDocRef);
+      
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        console.log('Dados encontrados:', {
+          id: userId,
+          nome: userData.nome,
+          imagemUri: userData.imagemUri,
+          photoURL: userData.photoURL, // Caso use outro campo
+        });
+        
+        return {
+          id: userId,
+          nome: userData.nome || 'Usuário',
+          // Tenta diferentes campos para a imagem
+          imagemUri: userData.imagemUri || userData.photoURL || userData.profileImage || null,
+        };
+      } else {
+        console.log('Documento não encontrado para userId:', userId);
+        return {
+          id: userId,
+          nome: 'Usuário',
+          imagemUri: null,
+        };
+      }
+    } catch (error) {
+      console.error('Erro ao buscar dados do usuário:', error);
+      return {
+        id: userId,
+        nome: 'Usuário',
+        imagemUri: null,
+      };
+    }
+  };
 
   useEffect(() => {
     const q = query(
-      collection(firestore, 'messages'),
+      collection(firestore, 'conversations'),
       where('participants', 'array-contains', currentUser.uid)
     );
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const msgs = snapshot.docs.map((doc) => ({
+    const unsubscribe = onSnapshot(q, async (snapshot) => {
+      const convs = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
-      setMessages(msgs.sort((a, b) => a.timestamp - b.timestamp));
+
+      console.log('Conversas encontradas:', convs.length);
+
+      // Buscar dados dos outros participantes
+      const conversationsWithUserData = await Promise.all(
+        convs.map(async (conv) => {
+          const otherUserId = conv.participants.find(
+            (uid) => uid !== currentUser.uid
+          );
+          
+          const userData = await getUserData(otherUserId);
+          
+          return {
+            ...conv,
+            otherUser: userData,
+          };
+        })
+      );
+
+      console.log('Conversas com dados dos usuários:', conversationsWithUserData);
+      setRecentConversations(conversationsWithUserData);
     });
 
     return unsubscribe;
   }, []);
 
-  const sendMessage = async () => {
-    if (!text.trim()) return;
+  const openConversation = async (targetUser) => {
+    try {
+      console.log('Abrindo conversa com:', targetUser);
+      
+      // Buscar conversa existente
+      const convQuery = query(
+        collection(firestore, 'conversations'),
+        where('participants', 'array-contains', currentUser.uid)
+      );
 
-    await addDoc(collection(firestore, 'messages'), {
-      text,
-      senderId: currentUser.uid,
-      recipientId,
-      participants: [currentUser.uid, recipientId],
-      timestamp: Date.now(),
-      read: false,
+      const convSnapshot = await getDocs(convQuery);
+      let conversationId = null;
+
+      // Verificar se já existe uma conversa entre os dois usuários
+      for (const doc of convSnapshot.docs) {
+        const data = doc.data();
+        if (data.participants.includes(targetUser.id)) {
+          conversationId = doc.id;
+          console.log('Conversa existente encontrada:', conversationId);
+          break;
+        }
+      }
+
+      // Se não existir, criar nova conversa
+      if (!conversationId) {
+        console.log('Criando nova conversa...');
+        const newConv = await addDoc(collection(firestore, 'conversations'), {
+          participants: [currentUser.uid, targetUser.id],
+          createdAt: Date.now(),
+          lastMessage: '',
+          lastMessageTime: Date.now(),
+        });
+        conversationId = newConv.id;
+        console.log('Nova conversa criada:', conversationId);
+      }
+
+      // Navegar para a tela de chat
+      navigation.navigate('Chat', {
+        conversationId,
+        recipientName: targetUser.nome,
+        recipientId: targetUser.id,
+      });
+    } catch (error) {
+      console.error('Erro ao abrir conversa:', error);
+    }
+  };
+
+  // Componente melhorado para renderizar avatar
+  const renderAvatar = (user) => {
+    const imageUri = user.imagemUri || user.photoURL || user.profileImage;
+    
+    console.log('Renderizando avatar para:', {
+      nome: user.nome,
+      imagemUri: imageUri,
     });
 
-    setText('');
+    if (imageUri && imageUri.trim() !== '') {
+      return (
+        <Image 
+          source={{ uri: imageUri }} 
+          style={styles.avatarImage}
+          onError={(error) => {
+            console.log('Erro ao carregar imagem:', error.nativeEvent.error);
+            console.log('URI da imagem:', imageUri);
+          }}
+          onLoad={() => {
+            console.log('Imagem carregada com sucesso:', imageUri);
+          }}
+        />
+      );
+    } else {
+      return (
+        <View style={styles.avatar}>
+          <Text style={styles.avatarText}>
+            {user.nome ? user.nome.charAt(0).toUpperCase() : 'U'}
+          </Text>
+        </View>
+      );
+    }
   };
 
-  const markAsRead = async (messageId) => {
-    await updateDoc(doc(firestore, 'messages', messageId), { read: true });
-  };
-
-  const renderItem = ({ item }) => {
-    const isCurrentUser = item.senderId === currentUser.uid;
-    return (
-      <View
-        style={[
-          styles.message,
-          isCurrentUser ? styles.messageRight : styles.messageLeft,
-          !item.read && !isCurrentUser && styles.unreadBorder,
-        ]}
-      >
-        <Text style={styles.sender}>
-          {isCurrentUser ? 'Você' : 'Admin'}:
-        </Text>
-        <Text>{item.text}</Text>
+  const renderMessageItem = ({ item }) => (
+    <TouchableOpacity
+      style={styles.messageItem}
+      onPress={() => openConversation(item)}
+    >
+      <View style={styles.avatarContainer}>
+        {renderAvatar(item)}
       </View>
-    );
-  };
+      <View style={styles.messageContent}>
+        <Text style={styles.name}>{item.nome || 'Usuário'}</Text>
+        <Text style={styles.subject}>Toque para conversar</Text>
+      </View>
+    </TouchableOpacity>
+  );
 
   return (
-    <View style={styles.wrapper}>
+    <SafeAreaView style={styles.container}>
+      <StatusBar backgroundColor="#1e3a8a" barStyle="light-content" />
+
+      {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.navigate('Admin')}>
-          <Text style={styles.backButton}>←</Text>
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Mensagens</Text>
+        <Text style={styles.headerText}>Mensagens</Text>
+        <View style={styles.placeholder} />
       </View>
 
-      <FlatList
-        data={messages}
-        ref={flatListRef}
-        onContentSizeChange={() => flatListRef.current.scrollToEnd({ animated: true })}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        contentContainerStyle={styles.chatContainer}
+      {/* Campo de pesquisa */}
+      <TextInput
+        placeholder="Pesquisar usuário..."
+        value={search}
+        onChangeText={handleSearch}
+        style={styles.searchInput}
       />
 
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={100}
-      >
-        <View style={styles.inputContainer}>
-          <TextInput
-            placeholder="Digite sua mensagem..."
-            value={text}
-            onChangeText={setText}
-            style={styles.input}
-            multiline
+      {search.length > 0 ? (
+        <FlatList
+          data={searchResults}
+          keyExtractor={(item) => item.id}
+          renderItem={renderMessageItem}
+          style={styles.flatList}
+        />
+      ) : (
+        <>
+          <Text style={styles.sectionTitle}>Conversas recentes</Text>
+          <FlatList
+            data={recentConversations}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.messageItem}
+                onPress={() => openConversation(item.otherUser)}
+              >
+                <View style={styles.avatarContainer}>
+                  {renderAvatar(item.otherUser)}
+                </View>
+                <View style={styles.messageContent}>
+                  <Text style={styles.name}>
+                    {item.otherUser?.nome || 'Usuário'}
+                  </Text>
+                  <Text style={styles.subject}>Conversa ativa</Text>
+                </View>
+              </TouchableOpacity>
+            )}
+            style={styles.flatList}
           />
-          <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
-            <Text style={styles.sendText}>Enviar</Text>
-          </TouchableOpacity>
-        </View>
-      </KeyboardAvoidingView>
-    </View>
+        </>
+      )}
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  wrapper: {
+  container: {
     flex: 1,
     backgroundColor: '#f4f6fa',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingTop: 50,
-    paddingBottom: 20,
-    backgroundColor: '#1e3a8a',
+    justifyContent: 'space-between',
+    paddingTop: 10,
+    paddingBottom: 15,
     paddingHorizontal: 20,
+    backgroundColor: '#1e3a8a',
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
   },
   backButton: {
-    color: '#fff',
-    fontSize: 24,
-    marginRight: 10,
+    padding: 5,
   },
-  headerTitle: {
+  headerText: {
+    color: '#fff',
     fontSize: 20,
-    color: '#fff',
     fontWeight: 'bold',
   },
-  chatContainer: {
-    paddingHorizontal: 20,
-    paddingBottom: 10,
+  placeholder: {
+    width: 34,
   },
-  message: {
-    maxWidth: '80%',
-    marginVertical: 6,
-    padding: 12,
-    borderRadius: 12,
-    backgroundColor: '#fff',
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowOffset: { width: 0, height: 1 },
-    elevation: 2,
-  },
-  messageLeft: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#e5e7eb',
-  },
-  messageRight: {
-    alignSelf: 'flex-end',
-    backgroundColor: '#dbeafe',
-  },
-  unreadBorder: {
-    borderLeftWidth: 4,
-    borderLeftColor: '#ef4444',
-  },
-  sender: {
-    fontWeight: 'bold',
-    marginBottom: 4,
-    fontSize: 14,
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    padding: 16,
-    borderTopWidth: 1,
-    borderColor: '#e5e7eb',
-    backgroundColor: '#fff',
-    alignItems: 'flex-end',
-  },
-  input: {
-    flex: 1,
-    maxHeight: 100,
+  searchInput: {
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 12,
     padding: 12,
+    backgroundColor: '#fff',
+    margin: 20,
+  },
+  sectionTitle: {
     fontSize: 16,
-    backgroundColor: '#f9fafb',
-  },
-  sendButton: {
-    backgroundColor: '#1e3a8a',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 12,
-    marginLeft: 10,
-    justifyContent: 'center',
-  },
-  sendText: {
-    color: '#fff',
     fontWeight: 'bold',
+    marginVertical: 10,
+    marginLeft: 20,
+    color: '#1e3a8a',
+  },
+  flatList: {
+    flex: 1,
+  },
+  messageItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    marginVertical: 6,
+    marginHorizontal: 20,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+  },
+  avatarContainer: {
+    marginRight: 15,
+  },
+  avatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#1e3a8a',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatarImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#f0f0f0', // Cor de fundo enquanto carrega
+  },
+  avatarText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  messageContent: {
+    flex: 1,
+  },
+  name: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#000',
+    marginBottom: 2,
+  },
+  subject: {
+    fontSize: 14,
+    color: '#666',
   },
 });
