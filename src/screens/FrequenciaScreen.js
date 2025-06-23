@@ -30,11 +30,11 @@ export default function FrequencyScreen({ route }) {
   // Enhanced mock data with error handling
   const studentData = useMemo(() => ({
     id: studentId || '1',
-    name: 'Mano Gandalf',
+    name: 'James Júnior',
     class: 'Maternal II',
     teacher: 'Ana Carolina',
     modality: 'Integral',
-    avatar: 'https://static1.srcdn.com/wordpress/wp-content/uploads/2017/07/Sir-Ian-McKellen-as-Gandalf-The-Grey-The-Shire-Lord-of-the-Rings-Peter-Jackson.jpg',
+    avatar: 'https://www.pintarcolorir.com.br/wp-content/uploads/2015/04/Desenhos-para-colorir-de-alunos-01-172x159.jpg',
     phone: '+55 11 99999-9999',
     email: 'maria.eduarda@escola.com',
   }), [studentId]);
