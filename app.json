@@ -4,18 +4,14 @@
     "slug": "MisParent",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/Logo.png",
+    "icon": "./assets/Logo-Icon-app.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff",
-      "jsEngine": "hermes",
-      "experimental": {
-      "bridgeless": false
-    }
-  },
+      "backgroundColor": "#ffffff"
+    },
     "ios": {
       "supportsTablet": true
     },
