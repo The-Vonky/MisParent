@@ -11,9 +11,12 @@ import {
   Modal,
   Alert,
   RefreshControl,
+  Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+
+const { height: screenHeight } = Dimensions.get('window');
 
 export default function PlanoDeAulaDetalhado({ route }) {
   const navigation = useNavigation();
@@ -324,103 +327,119 @@ export default function PlanoDeAulaDetalhado({ route }) {
         onRequestClose={closeModal}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>{selectedPlano.titulo}</Text>
-              <TouchableOpacity onPress={closeModal}>
-                <Ionicons name="close" size={24} color="#6b7280" />
-              </TouchableOpacity>
-            </View>
-            
-            <ScrollView style={styles.modalBody}>
-              {/* Info Básica */}
-              <View style={styles.modalSection}>
-                <Text style={styles.modalSectionTitle}>Informações Gerais</Text>
-                <View style={styles.infoGrid}>
-                  <View style={styles.infoItem}>
-                    <Text style={styles.infoLabel}>Data</Text>
-                    <Text style={styles.infoValue}>{formatDate(selectedPlano.data)}</Text>
-                  </View>
-                  <View style={styles.infoItem}>
-                    <Text style={styles.infoLabel}>Duração</Text>
-                    <Text style={styles.infoValue}>{selectedPlano.duracao}</Text>
-                  </View>
-                  <View style={styles.infoItem}>
-                    <Text style={styles.infoLabel}>Status</Text>
-                    <View style={[styles.statusBadge, { backgroundColor: getStatusColor(selectedPlano.status) + '20' }]}>
-                      <Text style={[styles.statusText, { color: getStatusColor(selectedPlano.status) }]}>
-                        {selectedPlano.status}
-                      </Text>
-                    </View>
-                  </View>
-                </View>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              {/* Header fixo */}
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle} numberOfLines={2}>
+                  {selectedPlano.titulo}
+                </Text>
+                <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
+                  <Ionicons name="close" size={24} color="#6b7280" />
+                </TouchableOpacity>
               </View>
-
-              {/* Objetivos */}
-              <View style={styles.modalSection}>
-                <Text style={styles.modalSectionTitle}>Objetivos de Aprendizagem</Text>
-                {selectedPlano.objetivos.map((objetivo, index) => (
-                  <View key={index} style={styles.objetivoItem}>
-                    <Ionicons name="checkmark-circle-outline" size={20} color={materiaConfig.cor} />
-                    <Text style={styles.objetivoText}>{objetivo}</Text>
-                  </View>
-                ))}
-              </View>
-
-              {/* Conteúdo */}
-              <View style={styles.modalSection}>
-                <Text style={styles.modalSectionTitle}>Conteúdo</Text>
-                <View style={styles.contentContainer}>
-                  <Text style={styles.contentText}>{selectedPlano.conteudo}</Text>
-                </View>
-              </View>
-
-              {/* Metodologia */}
-              <View style={styles.modalSection}>
-                <Text style={styles.modalSectionTitle}>Metodologia</Text>
-                <View style={styles.contentContainer}>
-                  <Text style={styles.contentText}>{selectedPlano.metodologia}</Text>
-                </View>
-              </View>
-
-              {/* Recursos */}
-              <View style={styles.modalSection}>
-                <Text style={styles.modalSectionTitle}>Recursos Necessários</Text>
-                <View style={styles.recursosContainer}>
-                  {selectedPlano.recursos.map((recurso, index) => (
-                    <View key={index} style={styles.recursoTag}>
-                      <Text style={styles.recursoText}>{recurso}</Text>
-                    </View>
-                  ))}
-                </View>
-              </View>
-
-              {/* Avaliação */}
-              <View style={styles.modalSection}>
-                <Text style={styles.modalSectionTitle}>Avaliação</Text>
-                <View style={styles.contentContainer}>
-                  <Text style={styles.contentText}>{selectedPlano.avaliacao}</Text>
-                </View>
-              </View>
-
-              {/* Observações */}
-              <View style={styles.modalSection}>
-                <Text style={styles.modalSectionTitle}>Observações</Text>
-                <View style={styles.contentContainer}>
-                  <Text style={styles.contentText}>{selectedPlano.observacoes}</Text>
-                </View>
-              </View>
-
-              {/* Feedback (se houver) */}
-              {selectedPlano.feedback && (
+              
+              {/* Conteúdo scrollável */}
+              <ScrollView 
+                style={styles.modalBody}
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.modalBodyContent}
+              >
+                {/* Info Básica */}
                 <View style={styles.modalSection}>
-                  <Text style={styles.modalSectionTitle}>Feedback da Aula</Text>
-                  <View style={[styles.contentContainer, { backgroundColor: '#10b981' + '10' }]}>
-                    <Text style={styles.contentText}>{selectedPlano.feedback}</Text>
+                  <Text style={styles.modalSectionTitle}>Informações Gerais</Text>
+                  <View style={styles.infoContainer}>
+                    <View style={styles.infoRow}>
+                      <View style={styles.infoItem}>
+                        <Text style={styles.infoLabel}>Data</Text>
+                        <Text style={styles.infoValue}>{formatDate(selectedPlano.data)}</Text>
+                      </View>
+                      <View style={styles.infoItem}>
+                        <Text style={styles.infoLabel}>Duração</Text>
+                        <Text style={styles.infoValue}>{selectedPlano.duracao}</Text>
+                      </View>
+                    </View>
+                    <View style={styles.infoRow}>
+                      <View style={styles.infoItem}>
+                        <Text style={styles.infoLabel}>Status</Text>
+                        <View style={[styles.statusBadgeModal, { backgroundColor: getStatusColor(selectedPlano.status) + '20' }]}>
+                          <Text style={[styles.statusTextModal, { color: getStatusColor(selectedPlano.status) }]}>
+                            {selectedPlano.status}
+                          </Text>
+                        </View>
+                      </View>
+                    </View>
                   </View>
                 </View>
-              )}
-            </ScrollView>
+
+                {/* Objetivos */}
+                <View style={styles.modalSection}>
+                  <Text style={styles.modalSectionTitle}>Objetivos de Aprendizagem</Text>
+                  <View style={styles.objetivosContainer}>
+                    {selectedPlano.objetivos.map((objetivo, index) => (
+                      <View key={index} style={styles.objetivoItem}>
+                        <Ionicons name="checkmark-circle-outline" size={20} color={materiaConfig.cor} />
+                        <Text style={styles.objetivoText}>{objetivo}</Text>
+                      </View>
+                    ))}
+                  </View>
+                </View>
+
+                {/* Conteúdo */}
+                <View style={styles.modalSection}>
+                  <Text style={styles.modalSectionTitle}>Conteúdo</Text>
+                  <View style={styles.contentContainer}>
+                    <Text style={styles.contentText}>{selectedPlano.conteudo}</Text>
+                  </View>
+                </View>
+
+                {/* Metodologia */}
+                <View style={styles.modalSection}>
+                  <Text style={styles.modalSectionTitle}>Metodologia</Text>
+                  <View style={styles.contentContainer}>
+                    <Text style={styles.contentText}>{selectedPlano.metodologia}</Text>
+                  </View>
+                </View>
+
+                {/* Recursos */}
+                <View style={styles.modalSection}>
+                  <Text style={styles.modalSectionTitle}>Recursos Necessários</Text>
+                  <View style={styles.recursosContainer}>
+                    {selectedPlano.recursos.map((recurso, index) => (
+                      <View key={index} style={styles.recursoTag}>
+                        <Text style={styles.recursoText}>{recurso}</Text>
+                      </View>
+                    ))}
+                  </View>
+                </View>
+
+                {/* Avaliação */}
+                <View style={styles.modalSection}>
+                  <Text style={styles.modalSectionTitle}>Avaliação</Text>
+                  <View style={styles.contentContainer}>
+                    <Text style={styles.contentText}>{selectedPlano.avaliacao}</Text>
+                  </View>
+                </View>
+
+                {/* Observações */}
+                <View style={styles.modalSection}>
+                  <Text style={styles.modalSectionTitle}>Observações</Text>
+                  <View style={styles.contentContainer}>
+                    <Text style={styles.contentText}>{selectedPlano.observacoes}</Text>
+                  </View>
+                </View>
+
+                {/* Feedback (se houver) */}
+                {selectedPlano.feedback && (
+                  <View style={[styles.modalSection, { marginBottom: 0 }]}>
+                    <Text style={styles.modalSectionTitle}>Feedback da Aula</Text>
+                    <View style={[styles.contentContainer, styles.feedbackContainer]}>
+                      <Text style={styles.contentText}>{selectedPlano.feedback}</Text>
+                    </View>
+                  </View>
+                )}
+              </ScrollView>
+            </View>
           </View>
         </View>
       </Modal>
@@ -641,6 +660,7 @@ const styles = StyleSheet.create({
   },
   planoInfo: {
     flex: 1,
+    marginRight: 12,
   },
   planoTitulo: {
     fontSize: 16,
@@ -656,6 +676,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 12,
+    minWidth: 80,
+    alignItems: 'center',
   },
   statusText: {
     fontSize: 10,
@@ -696,22 +718,27 @@ const styles = StyleSheet.create({
     marginTop: 12,
     textAlign: 'center',
   },
+  // Modal Styles - Corrigidos
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'flex-end',
   },
-  modalContent: {
+  modalContainer: {
+    height: screenHeight * 0.9,
     backgroundColor: '#fff',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    maxHeight: '90%',
+  },
+  modalContent: {
+    flex: 1,
   },
   modalHeader: {
     flexDirection: 'row',
+    alignItems: 'flex-start',
     justifyContent: 'space-between',
-    alignItems: 'center',
     padding: 20,
+    paddingBottom: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#e5e7eb',
   },
@@ -721,10 +748,17 @@ const styles = StyleSheet.create({
     color: '#1e3a8a',
     flex: 1,
     marginRight: 16,
+    lineHeight: 24,
+  },
+  closeButton: {
+    padding: 4,
   },
   modalBody: {
     flex: 1,
+  },
+  modalBodyContent: {
     padding: 20,
+    paddingBottom: 40,
   },
   modalSection: {
     marginBottom: 24,
@@ -735,42 +769,65 @@ const styles = StyleSheet.create({
     color: '#1e3a8a',
     marginBottom: 12,
   },
-  infoGrid: {
+  // Info Container - Corrigido
+  infoContainer: {
+    gap: 12,
+  },
+  infoRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     gap: 16,
   },
   infoItem: {
     flex: 1,
-    minWidth: 100,
   },
   infoLabel: {
     fontSize: 12,
     color: '#6b7280',
     marginBottom: 4,
+    fontWeight: '500',
   },
   infoValue: {
     fontSize: 14,
     fontWeight: '600',
     color: '#111827',
   },
+  statusBadgeModal: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+  },
+  statusTextModal: {
+    fontSize: 12,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+  },
+  // Objetivos Container
+  objetivosContainer: {
+    gap: 12,
+  },
   objetivoItem: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    marginBottom: 8,
-    paddingRight: 16,
+    gap: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: '#f9fafb',
+    borderRadius: 8,
+    borderLeftWidth: 3,
+    borderLeftColor: '#10b981',
   },
   objetivoText: {
     fontSize: 14,
     color: '#374151',
-    marginLeft: 12,
-    flex: 1,
     lineHeight: 20,
+    flex: 1,
   },
+  // Content Container
   contentContainer: {
     backgroundColor: '#f9fafb',
-    borderRadius: 12,
     padding: 16,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: '#e5e7eb',
   },
@@ -779,20 +836,30 @@ const styles = StyleSheet.create({
     color: '#374151',
     lineHeight: 20,
   },
+  // Recursos Container
   recursosContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
   },
   recursoTag: {
-    backgroundColor: '#3b82f6' + '20',
+    backgroundColor: '#e0e7ff',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#c7d2fe',
   },
   recursoText: {
     fontSize: 12,
-    color: '#3b82f6',
+    color: '#3730a3',
     fontWeight: '500',
+  },
+  // Feedback Container
+  feedbackContainer: {
+    backgroundColor: '#f0fdf4',
+    borderColor: '#bbf7d0',
+    borderLeftWidth: 3,
+    borderLeftColor: '#10b981',
   },
 });
